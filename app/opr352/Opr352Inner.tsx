@@ -21,11 +21,26 @@ export default function Opr352Inner() {
       />
 
       {/* Header */}
-      <header className="flex items-center justify-between mb-4">
-        <div className="text-sm text-gray-600">🏠 Home</div>
-        <div className="text-blue-600 font-semibold">OPR352 - AWB Enquiry</div>
-        <div className="text-sm text-gray-600">User: C_DIVESH.CHOUDHARY1</div>
-      </header>
+
+<header className="flex items-center justify-between mb-4">
+  
+  <div className="text-sm text-gray-600">🏠 Home</div>
+
+  <div className="flex items-center gap-3">
+    <div className="text-blue-600 font-semibold">OPR352 - AWB Enquiry</div>
+
+    {/* BACK BUTTON */}
+    <button
+      onClick={() => router.push("/")}
+      className="px-3 py-1 border rounded text-sm bg-gray-100 hover:bg-gray-200"
+    >
+      ← Back
+    </button>
+  </div>
+
+  <div className="text-sm text-gray-600">User: C_DIVESH.CHOUDHARY1</div>
+</header>
+
 
       {/* AWB strip */}
       <div className="bg-white border rounded-md p-3 mb-4 shadow-sm max-w-[1200px]">

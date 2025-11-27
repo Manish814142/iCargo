@@ -1,6 +1,8 @@
 "use client";
 
-import { useSearchParams } from "next/navigation";
+//import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
+
 import { useState } from "react";
 
 // ---------------------------------------------------------------------------
@@ -215,6 +217,7 @@ function ChargesTab() {
 // ---------------------------------------------------------------------------
 export default function AwbPageComponent() {
 
+  const router = useRouter();  
   const searchParams = useSearchParams();
   const awbFromQuery = searchParams?.get("awb") ?? "";
 
@@ -242,15 +245,40 @@ export default function AwbPageComponent() {
     <div className="min-h-screen bg-gray-50 text-sans">
 
       {/* Your original header */}
-      <header className="bg-white border-b border-gray-200">
-        <div className="max-w-[1200px] mx-auto px-4 py-2 flex items-center gap-4">
-          <div className="text-sm text-gray-600">🏠 Home</div>
-          <div className="flex-1 text-center text-sm text-blue-600 font-semibold">
-            Capture AWB / Screen : OPR026
-          </div>
-          <div className="text-sm text-gray-600">User: C_DIVESH.CHOUDHARY1</div>
-        </div>
-      </header>
+
+
+
+
+
+
+
+{/* Your original header */}
+<header className="bg-white border-b border-gray-200">
+  <div className="max-w-[1200px] mx-auto px-4 py-2 flex items-center gap-4">
+
+    <div className="text-sm text-gray-600">🏠 Home</div>
+
+    <div className="flex-1 text-center text-sm text-blue-600 font-semibold">
+      Capture AWB / Screen : OPR026
+    </div>
+
+    {/* BACK BUTTON ADDED HERE */}
+    <div className="flex items-center gap-3">
+      <button
+        onClick={() => router.push("/")}
+        className="px-3 py-1 border rounded text-sm bg-gray-100 hover:bg-gray-200"
+      >
+        ← Back
+      </button>
+
+      <div className="text-sm text-gray-600">User: C_DIVESH.CHOUDHARY1</div>
+    </div>
+
+  </div>
+</header>
+
+
+
 
       {/* AWB Header Block – unchanged */}
       <section className="max-w-[1200px] mx-auto px-4 py-3">
