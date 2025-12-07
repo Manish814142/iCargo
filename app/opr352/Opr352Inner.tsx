@@ -4,6 +4,7 @@
 export const dynamic = "force-dynamic";
 
 import { useRouter, useSearchParams } from "next/navigation";
+import { useEffect } from "react";
 
 export default function Opr352Inner() {
     const router = useRouter();
@@ -13,6 +14,14 @@ export default function Opr352Inner() {
     const openFWB = () => {
         router.push(`/opr352/fwb?awb=${awb}`);
     };
+
+    useEffect(() => {
+        if (!awb) return;
+        const timer = setTimeout(() => {
+            router.push(`/awb?awb=${awb}&type=FWB`);
+        }, 4000);
+        return () => clearTimeout(timer);
+    }, [awb, router]);
 
     return (
         <div className="min-h-screen bg-gray-50 text-sm">
