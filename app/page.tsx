@@ -45,7 +45,7 @@ export default function HomePage() {
               setAwb("");
             }}
           >
-            OPR352 – AWB Enquiry
+            OPR352 – FWB Enquiry
           </button>
         </div>
 
