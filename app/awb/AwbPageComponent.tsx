@@ -346,6 +346,7 @@ export default function AwbPageComponent() {
 
     const [activeTab, setActiveTab] = useState("general");
     const [isLoading, setIsLoading] = useState(false);
+    const [isEvaluatingRules, setIsEvaluatingRules] = useState(false);
     const [showModal, setShowModal] = useState(false);
     const [modalData, setModalData] = useState<any[] | null>(null);
     const [modalTitle, setModalTitle] = useState("");
@@ -624,6 +625,7 @@ export default function AwbPageComponent() {
                         }
 
                         console.log("Evaluating AI Rule...");
+                        setIsEvaluatingRules(true);
                         const ruleResponse = await fetch("https://uat.aiqod.com:453/aiqod-agent/agent/evaluateAIRule", {
                             method: "POST",
                             headers: {
@@ -637,6 +639,7 @@ export default function AwbPageComponent() {
 
                         const ruleResult = await ruleResponse.json();
                         console.log("AI Rule Evaluation Response:", ruleResult);
+                        setIsEvaluatingRules(false);
 
                         if (ruleResult?.data?.DocumentLevelError && ruleResult.data.DocumentLevelError.length > 0) {
                             setModalTitle("Error Details");
@@ -665,6 +668,7 @@ export default function AwbPageComponent() {
 
                 } catch (error) {
                     console.error("Error fetching AWB Documents:", error);
+                    setIsEvaluatingRules(false);
                 }
             };
 
@@ -747,7 +751,7 @@ export default function AwbPageComponent() {
                                     {awbFromQuery ? awbFromQuery.slice(0, 3) : "098"}
                                 </div>
                                 <div className="bg-yellow-200 border border-yellow-300 px-3 py-1 rounded text-sm font-medium">
-                                    {awbFromQuery ? awbFromQuery.slice(3) : "49170704"}
+                                    {awbFromQuery ? awbFromQuery.slice(3).replace(/^[\s-]+/, "") : "49170704"}
                                 </div>
                             </div>
                         </div>
@@ -798,6 +802,18 @@ export default function AwbPageComponent() {
                     {isLoading && (
                         <div className="absolute inset-0 bg-white/50 flex items-center justify-center z-10">
                             <div className="text-blue-600 font-semibold">Loading AWB Details...</div>
+                        </div>
+                    )}
+
+                    {isEvaluatingRules && (
+                        <div className="absolute inset-0 bg-white/70 flex items-center justify-center z-20">
+                            <div className="bg-white p-6 rounded-lg shadow-xl border-2 border-blue-500 flex flex-col items-center gap-3">
+                                <div className="flex items-center gap-3">
+                                    <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+                                    <div className="text-blue-600 font-semibold text-lg">Evaluating AI Rules...</div>
+                                </div>
+                                <div className="text-gray-600 text-sm">This may take 1-2 minutes. Please wait.</div>
+                            </div>
                         </div>
                     )}
 
