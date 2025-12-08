@@ -88,7 +88,7 @@ export default function Opr352Inner() {
                                     {awb ? awb.slice(0, 3) : "098"}
                                 </div>
                                 <div className="bg-yellow-200 px-3 py-1 rounded text-sm font-medium">
-                                    {awb ? awb.slice(3) : "30680650"}
+                                    {awb ? awb.slice(3).replace(/^[\s-]+/, "") : "30680650"}
                                 </div>
                             </div>
                         </div>

@@ -11,12 +11,41 @@ import { useState, useEffect } from "react";
 // ---------------------------------------------------------------------------
 // CHARGES & ACCOUNTING TAB UI
 // ---------------------------------------------------------------------------
-function ChargesTab({ data, onChange, errorFields }: { data: any, onChange: (field: string, value: any) => void, errorFields: Set<string> }) {
+function ChargesTab({ data, onChange, errorFields }: { data: any, onChange: (field: string, value: any) => void, errorFields: Map<string, string[]> }) {
 
     const getInputClass = (fieldKey: string) => {
-        return errorFields.has(fieldKey)
+        const errors = errorFields.get(fieldKey);
+        return errors && errors.length > 0
             ? "border rounded px-2 py-1 w-full border-red-500 bg-red-50"
             : "border rounded px-2 py-1 w-full";
+    };
+
+    // Error Tooltip Component
+    const ErrorTooltip = ({ fieldKey }: { fieldKey: string }) => {
+        const errorMessages = errorFields.get(fieldKey);
+        if (!errorMessages || errorMessages.length === 0) return null;
+
+        return (
+            <div className="group relative inline-block ml-1">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4 text-red-600 cursor-help">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z" />
+                </svg>
+                <div className="invisible group-hover:visible absolute left-0 top-6 z-50 max-w-md p-3 bg-gray-900 text-white text-xs rounded shadow-xl">
+                    {errorMessages.length === 1 ? (
+                        <div>{errorMessages[0]}</div>
+                    ) : (
+                        <div className="space-y-1">
+                            {errorMessages.map((msg, idx) => (
+                                <div key={idx} className="flex gap-2">
+                                    <span className="font-semibold">{idx + 1}.</span>
+                                    <span>{msg}</span>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                </div>
+            </div>
+        );
     };
 
     const handleRatingChange = (index: number, field: string, value: string) => {
@@ -50,7 +79,10 @@ function ChargesTab({ data, onChange, errorFields }: { data: any, onChange: (fie
                 <div className="grid grid-cols-12 gap-4 mb-3">
 
                     <div className="col-span-2">
-                        <label className="text-xs text-gray-600">Currency</label>
+                        <label className="text-xs text-gray-600 flex items-center">
+                            Currency
+                            <ErrorTooltip fieldKey="Currency" />
+                        </label>
                         <input
                             className={getInputClass("Currency")}
                             value={data.currency}
@@ -129,8 +161,12 @@ function ChargesTab({ data, onChange, errorFields }: { data: any, onChange: (fie
                 {/* Third grid */}
                 <div className="grid grid-cols-12 gap-4 mt-3">
                     <div className="col-span-3">
-                        <label className="text-xs text-gray-600">Date of Journey</label>
+                        <label className="text-xs text-gray-600 flex items-center">
+                            Date of Journey *
+                            <ErrorTooltip fieldKey="Journey_Date" />
+                        </label>
                         <input
+                            type="date"
                             className={getInputClass("Journey_Date")}
                             value={data.dateOfJourney}
                             onChange={(e) => onChange("dateOfJourney", e.target.value)}
@@ -174,12 +210,30 @@ function ChargesTab({ data, onChange, errorFields }: { data: any, onChange: (fie
                     <thead className="bg-gray-100">
                         <tr>
                             {[
-                                "No of Pcs", "Weight", "Adjusted Weight", "RCP", "Rate Class",
-                                "Commodity", "IATA Code", "Service Code", "Chargeable Weight",
-                                "IATA Rate", "IATA Charge", "Volume",
-                                "Country of Origin", "ULD", "Description", "Rate/Pivot", "Net Charge"
-                            ].map((h, i) => (
-                                <th key={i} className="border px-2 py-1">{h}</th>
+                                { label: "No of Pcs", key: "No_of_Pieces" },
+                                { label: "Weight", key: "Gross_Weight" },
+                                { label: "Adjusted Weight", key: "" },
+                                { label: "RCP", key: "" },
+                                { label: "Rate Class", key: "" },
+                                { label: "Commodity", key: "" },
+                                { label: "IATA Code", key: "" },
+                                { label: "Service Code", key: "" },
+                                { label: "Chargeable Weight", key: "Chargeable_Weight" },
+                                { label: "IATA Rate", key: "" },
+                                { label: "IATA Charge", key: "" },
+                                { label: "Volume", key: "" },
+                                { label: "Country of Origin", key: "" },
+                                { label: "ULD", key: "" },
+                                { label: "Description", key: "" },
+                                { label: "Rate/Pivot", key: "" },
+                                { label: "Net Charge", key: "" }
+                            ].map((col, i) => (
+                                <th key={i} className="border px-2 py-1">
+                                    <div className="flex items-center justify-center">
+                                        {col.label}
+                                        {col.key && <ErrorTooltip fieldKey={col.key} />}
+                                    </div>
+                                </th>
                             ))}
                         </tr>
                     </thead>
@@ -346,21 +400,54 @@ export default function AwbPageComponent() {
 
     const [activeTab, setActiveTab] = useState("general");
     const [isLoading, setIsLoading] = useState(false);
+    const [isEvaluatingRules, setIsEvaluatingRules] = useState(false);
     const [showModal, setShowModal] = useState(false);
     const [modalData, setModalData] = useState<any[] | null>(null);
     const [modalTitle, setModalTitle] = useState("");
 
     const [hasErrors, setHasErrors] = useState(false);
-    const [errorFields, setErrorFields] = useState<Set<string>>(new Set());
+    const [errorFields, setErrorFields] = useState<Map<string, string[]>>(new Map());
 
     const getInputClass = (fieldKey: string) => {
-        return errorFields.has(fieldKey)
+        const errors = errorFields.get(fieldKey);
+        return errors && errors.length > 0
             ? "w-full border rounded px-2 py-1 border-red-500 bg-red-50"
             : "w-full border rounded px-2 py-1";
     };
 
+    // Error Tooltip Component
+    const ErrorTooltip = ({ fieldKey }: { fieldKey: string }) => {
+        const errorMessages = errorFields.get(fieldKey);
+        if (!errorMessages || errorMessages.length === 0) return null;
+
+        return (
+            <div className="group relative inline-block ml-1">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4 text-red-600 cursor-help">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z" />
+                </svg>
+                <div className="invisible group-hover:visible absolute left-0 top-6 z-50 max-w-md p-3 bg-gray-900 text-white text-xs rounded shadow-xl">
+                    {errorMessages.length === 1 ? (
+                        <div>{errorMessages[0]}</div>
+                    ) : (
+                        <div className="space-y-1">
+                            {errorMessages.map((msg, idx) => (
+                                <div key={idx} className="flex gap-2">
+                                    <span className="font-semibold">{idx + 1}.</span>
+                                    <span>{msg}</span>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                </div>
+            </div>
+        );
+    };
+
 
     // Initial Data State
+    const [awbPrefix, setAwbPrefix] = useState("");
+    const [awbNumber, setAwbNumber] = useState("");
+
     const [generalData, setGeneralData] = useState({
         ownerCode: "",
         ubrNo: "",
@@ -417,6 +504,16 @@ export default function AwbPageComponent() {
     const handleChargesChange = (field: string, value: any) => {
         setChargesData(prev => ({ ...prev, [field]: value }));
     };
+
+    useEffect(() => {
+        if (awbFromQuery) {
+            // Parse AWB from query parameter
+            const prefix = awbFromQuery.slice(0, 3);
+            const number = awbFromQuery.slice(3).replace(/^[\s-]+/, "");
+            setAwbPrefix(prefix);
+            setAwbNumber(number);
+        }
+    }, [awbFromQuery]);
 
     useEffect(() => {
         if (!awbFromQuery) return;
@@ -624,6 +721,7 @@ export default function AwbPageComponent() {
                         }
 
                         console.log("Evaluating AI Rule...");
+                        setIsEvaluatingRules(true);
                         const ruleResponse = await fetch("https://uat.aiqod.com:453/aiqod-agent/agent/evaluateAIRule", {
                             method: "POST",
                             headers: {
@@ -637,6 +735,7 @@ export default function AwbPageComponent() {
 
                         const ruleResult = await ruleResponse.json();
                         console.log("AI Rule Evaluation Response:", ruleResult);
+                        setIsEvaluatingRules(false);
 
                         if (ruleResult?.data?.DocumentLevelError && ruleResult.data.DocumentLevelError.length > 0) {
                             setModalTitle("Error Details");
@@ -644,11 +743,16 @@ export default function AwbPageComponent() {
                             setHasErrors(true);
                             setShowModal(true);
 
-                            // Extract error fields
-                            const newErrorFields = new Set<string>();
+                            // Extract error fields and messages - group by field key
+                            const newErrorFields = new Map<string, string[]>();
                             ruleResult.data.DocumentLevelError.forEach((err: any) => {
                                 const key = Object.keys(err)[0];
-                                newErrorFields.add(key);
+                                const value = err[key];
+
+                                if (!newErrorFields.has(key)) {
+                                    newErrorFields.set(key, []);
+                                }
+                                newErrorFields.get(key)!.push(value);
                             });
                             setErrorFields(newErrorFields);
 
@@ -657,7 +761,7 @@ export default function AwbPageComponent() {
                             setModalData(null);
                             setHasErrors(false);
                             setShowModal(true);
-                            setErrorFields(new Set());
+                            setErrorFields(new Map());
                         }
 
 
@@ -665,6 +769,7 @@ export default function AwbPageComponent() {
 
                 } catch (error) {
                     console.error("Error fetching AWB Documents:", error);
+                    setIsEvaluatingRules(false);
                 }
             };
 
@@ -741,14 +846,24 @@ export default function AwbPageComponent() {
                     <div className="flex items-start gap-4">
 
                         <div>
-                            <div className="text-xs text-gray-600 mb-1">AWB Number</div>
+                            <div className="text-xs text-gray-600 mb-1 flex items-center">
+                                AWB Number
+                                <ErrorTooltip fieldKey="AWB_No" />
+                            </div>
                             <div className="flex items-center gap-1">
-                                <div className="bg-yellow-300 border border-yellow-400 px-2 py-1 rounded text-sm font-medium min-w-[56px] text-center">
-                                    {awbFromQuery ? awbFromQuery.slice(0, 3) : "098"}
-                                </div>
-                                <div className="bg-yellow-200 border border-yellow-300 px-3 py-1 rounded text-sm font-medium">
-                                    {awbFromQuery ? awbFromQuery.slice(3) : "49170704"}
-                                </div>
+                                <input
+                                    type="text"
+                                    maxLength={3}
+                                    className={errorFields.has("AWB_No") ? "bg-red-100 border-2 border-red-500 px-2 py-1 rounded text-sm font-medium w-14 text-center" : "bg-yellow-300 border border-yellow-400 px-2 py-1 rounded text-sm font-medium w-14 text-center"}
+                                    value={awbPrefix}
+                                    onChange={(e) => setAwbPrefix(e.target.value)}
+                                />
+                                <input
+                                    type="text"
+                                    className={errorFields.has("AWB_No") ? "bg-red-100 border-2 border-red-500 px-3 py-1 rounded text-sm font-medium w-28" : "bg-yellow-200 border border-yellow-300 px-3 py-1 rounded text-sm font-medium w-28"}
+                                    value={awbNumber}
+                                    onChange={(e) => setAwbNumber(e.target.value)}
+                                />
                             </div>
                         </div>
 
@@ -798,6 +913,18 @@ export default function AwbPageComponent() {
                     {isLoading && (
                         <div className="absolute inset-0 bg-white/50 flex items-center justify-center z-10">
                             <div className="text-blue-600 font-semibold">Loading AWB Details...</div>
+                        </div>
+                    )}
+
+                    {isEvaluatingRules && (
+                        <div className="absolute inset-0 bg-white/70 flex items-center justify-center z-20">
+                            <div className="bg-white p-6 rounded-lg shadow-xl border-2 border-blue-500 flex flex-col items-center gap-3">
+                                <div className="flex items-center gap-3">
+                                    <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+                                    <div className="text-blue-600 font-semibold text-lg">Evaluating AI Rules...</div>
+                                </div>
+                                <div className="text-gray-600 text-sm">This may take 1-2 minutes. Please wait.</div>
+                            </div>
                         </div>
                     )}
 
@@ -859,7 +986,10 @@ export default function AwbPageComponent() {
                                 <div className="grid grid-cols-12 gap-4 items-center">
 
                                     <div className="col-span-2">
-                                        <label className="text-xs text-gray-600">Origin *</label>
+                                        <label className="text-xs text-gray-600 flex items-center">
+                                            Origin *
+                                            <ErrorTooltip fieldKey="Origin_Code" />
+                                        </label>
                                         <input
                                             className={getInputClass("Origin_Code")}
                                             value={generalData.origin}
@@ -868,7 +998,10 @@ export default function AwbPageComponent() {
                                     </div>
 
                                     <div className="col-span-2">
-                                        <label className="text-xs text-gray-600">Destination *</label>
+                                        <label className="text-xs text-gray-600 flex items-center">
+                                            Destination *
+                                            <ErrorTooltip fieldKey="Destination_Code" />
+                                        </label>
                                         <input
                                             className={getInputClass("Destination_Code")}
                                             value={generalData.destination}
@@ -894,8 +1027,11 @@ export default function AwbPageComponent() {
                                         />
                                     </div>
 
-                                    <div className="col-span-1">
-                                        <label className="text-xs text-gray-600">SCC</label>
+                                    <div className="col-span-2">
+                                        <label className="text-xs text-gray-600 flex items-center">
+                                            SCC
+                                            <ErrorTooltip fieldKey="SSC_Code" />
+                                        </label>
                                         <input
                                             className={getInputClass("SSC_Code")}
                                             value={generalData.scc}
@@ -903,8 +1039,11 @@ export default function AwbPageComponent() {
                                         />
                                     </div>
 
-                                    <div className="col-span-1">
-                                        <label className="text-xs text-gray-600">Product</label>
+                                    <div className="col-span-2">
+                                        <label className="text-xs text-gray-600 flex items-center">
+                                            Product
+                                            <ErrorTooltip fieldKey="Product_Code" />
+                                        </label>
                                         <input
                                             className={getInputClass("Product_Code")}
                                             value={generalData.product}
@@ -922,7 +1061,10 @@ export default function AwbPageComponent() {
 
                                     <div className="grid grid-cols-12 gap-4">
                                         <div className="col-span-2">
-                                            <label className="text-xs text-gray-600">Code</label>
+                                            <label className="text-xs text-gray-600 flex items-center">
+                                                Code
+                                                <ErrorTooltip fieldKey="Agent_Code" />
+                                            </label>
                                             <input
                                                 className={getInputClass("Agent_Code")}
                                                 value={generalData.agentCode}
@@ -940,7 +1082,10 @@ export default function AwbPageComponent() {
                                         </div>
 
                                         <div className="col-span-2">
-                                            <label className="text-xs text-gray-600">IATA Code</label>
+                                            <label className="text-xs text-gray-600 flex items-center">
+                                                IATA Code
+                                                <ErrorTooltip fieldKey="IATA_Code" />
+                                            </label>
                                             <input
                                                 className={getInputClass("IATA_Code")}
                                                 value={generalData.iataCode}
