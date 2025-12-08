@@ -362,6 +362,9 @@ export default function AwbPageComponent() {
 
 
     // Initial Data State
+    const [awbPrefix, setAwbPrefix] = useState("");
+    const [awbNumber, setAwbNumber] = useState("");
+
     const [generalData, setGeneralData] = useState({
         ownerCode: "",
         ubrNo: "",
@@ -418,6 +421,16 @@ export default function AwbPageComponent() {
     const handleChargesChange = (field: string, value: any) => {
         setChargesData(prev => ({ ...prev, [field]: value }));
     };
+
+    useEffect(() => {
+        if (awbFromQuery) {
+            // Parse AWB from query parameter
+            const prefix = awbFromQuery.slice(0, 3);
+            const number = awbFromQuery.slice(3).replace(/^[\s-]+/, "");
+            setAwbPrefix(prefix);
+            setAwbNumber(number);
+        }
+    }, [awbFromQuery]);
 
     useEffect(() => {
         if (!awbFromQuery) return;
@@ -747,12 +760,19 @@ export default function AwbPageComponent() {
                         <div>
                             <div className="text-xs text-gray-600 mb-1">AWB Number</div>
                             <div className="flex items-center gap-1">
-                                <div className="bg-yellow-300 border border-yellow-400 px-2 py-1 rounded text-sm font-medium min-w-[56px] text-center">
-                                    {awbFromQuery ? awbFromQuery.slice(0, 3) : "098"}
-                                </div>
-                                <div className="bg-yellow-200 border border-yellow-300 px-3 py-1 rounded text-sm font-medium">
-                                    {awbFromQuery ? awbFromQuery.slice(3).replace(/^[\s-]+/, "") : "49170704"}
-                                </div>
+                                <input
+                                    type="text"
+                                    maxLength={3}
+                                    className={errorFields.has("AWB_No") ? "bg-red-100 border-2 border-red-500 px-2 py-1 rounded text-sm font-medium w-14 text-center" : "bg-yellow-300 border border-yellow-400 px-2 py-1 rounded text-sm font-medium w-14 text-center"}
+                                    value={awbPrefix}
+                                    onChange={(e) => setAwbPrefix(e.target.value)}
+                                />
+                                <input
+                                    type="text"
+                                    className={errorFields.has("AWB_No") ? "bg-red-100 border-2 border-red-500 px-3 py-1 rounded text-sm font-medium w-28" : "bg-yellow-200 border border-yellow-300 px-3 py-1 rounded text-sm font-medium w-28"}
+                                    value={awbNumber}
+                                    onChange={(e) => setAwbNumber(e.target.value)}
+                                />
                             </div>
                         </div>
 
