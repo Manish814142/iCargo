@@ -10,6 +10,7 @@ export default function Opr352Inner() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const awb = searchParams?.get("awb") ?? "";
+    const autoClose = searchParams?.get("autoClose");
 
     const openFWB = () => {
         router.push(`/opr352/fwb?awb=${awb}`);
@@ -18,10 +19,13 @@ export default function Opr352Inner() {
     useEffect(() => {
         if (!awb) return;
         const timer = setTimeout(() => {
-            router.push(`/awb?awb=${awb}&type=FWB`);
+            const redirectUrl = autoClose === "true"
+                ? `/awb?awb=${awb}&type=FWB&autoClose=true`
+                : `/awb?awb=${awb}&type=FWB`;
+            router.push(redirectUrl);
         }, 4000);
         return () => clearTimeout(timer);
-    }, [awb, router]);
+    }, [awb, autoClose, router]);
 
     return (
         <div className="min-h-screen bg-gray-50 text-sm">

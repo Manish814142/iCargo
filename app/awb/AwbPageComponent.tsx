@@ -397,6 +397,7 @@ export default function AwbPageComponent() {
     const searchParams = useSearchParams();
     const awbFromQuery = searchParams.get("awb");
     const typeFromQuery = searchParams.get("type") ?? "";
+    const autoCloseParam = searchParams.get("autoClose") === "true";
 
     const [activeTab, setActiveTab] = useState("general");
     const [isLoading, setIsLoading] = useState(false);
@@ -616,6 +617,25 @@ export default function AwbPageComponent() {
             fetchAwbDetails(awbFromQuery);
         }
     }, [awbFromQuery]);
+
+    // Auto-switch to Charges tab and auto-close for external users
+    useEffect(() => {
+        if (autoCloseParam && !isLoading && generalData.origin) {
+            // Data has loaded successfully (generalData.origin indicates data is populated)
+            const timer = setTimeout(() => {
+                console.log("Auto-switching to Charges & Accounting tab...");
+                setActiveTab("charges");
+
+                // Close window after showing the tab switch
+                setTimeout(() => {
+                    console.log("Auto-closing window...");
+                    window.close();
+                }, 500);
+            }, 3000); // 3 second delay
+
+            return () => clearTimeout(timer);
+        }
+    }, [autoCloseParam, isLoading, generalData.origin]);
 
     useEffect(() => {
         // DISABLED: AWB Documents fetch and AI rule evaluation as per requirement on 2025-12-10
