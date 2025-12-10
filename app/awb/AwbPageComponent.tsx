@@ -397,6 +397,7 @@ export default function AwbPageComponent() {
     const searchParams = useSearchParams();
     const awbFromQuery = searchParams.get("awb");
     const typeFromQuery = searchParams.get("type") ?? "";
+    const autoCloseParam = searchParams.get("autoClose") === "true";
 
     const [activeTab, setActiveTab] = useState("general");
     const [isLoading, setIsLoading] = useState(false);
@@ -515,109 +516,132 @@ export default function AwbPageComponent() {
         }
     }, [awbFromQuery]);
 
-    useEffect(() => {
-        if (!awbFromQuery) return;
+    const fetchAwbDetails = async (searchValue: string) => {
+        setIsLoading(true);
+        try {
+            const response = await fetch("https://uat.aiqod.com:453/gibots-api/crud/iCargo", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    collectionName: "iCargo",
+                    searchKey: "AWB_No",
+                    searchValue: searchValue
+                })
+            });
 
-        const fetchAwbDetails = async () => {
-            setIsLoading(true);
-            try {
-                const response = await fetch("https://uat.aiqod.com:453/gibots-api/crud/iCargo", {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json"
-                    },
-                    body: JSON.stringify({
-                        collectionName: "iCargo",
-                        searchKey: "AWB_No",
-                        searchValue: awbFromQuery
-                    })
-                });
+            const result = await response.json();
+            console.log("API Response:", result);
 
-                const result = await response.json();
-                console.log("API Response:", result);
+            if ((result.status === 200 || result.status === 0) && result.data) {
+                const apiData = result.data;
 
-                if ((result.status === 200 || result.status === 0) && result.data) {
-                    const apiData = result.data;
+                // Map API data to General Data
+                setGeneralData(prev => ({
+                    ...prev,
+                    origin: apiData.Origin_Code || "",
+                    destination: apiData.Destination_Code || "",
+                    agentCode: apiData.Agent_Code || "",
+                    iataCode: apiData.IATA_Code || "",
+                    scc: apiData.SCC_Code || "",
+                    product: apiData.Product_Code || ""
+                }));
 
-                    // Map API data to General Data
-                    setGeneralData(prev => ({
-                        ...prev,
-                        origin: apiData.Origin_Code || "",
-                        destination: apiData.Destination_Code || "",
-                        agentCode: apiData.Agent_Code || "",
-                        iataCode: apiData.IATA_Code || "",
-                        scc: apiData.SCC_Code || "",
-                        product: apiData.Product_Code || ""
-                    }));
+                // Map API data to Charges Data
+                setChargesData(prev => ({
+                    ...prev,
+                    currency: apiData.Currency || "",
+                    paymentType: apiData.Payment_Type || "",
+                    dateOfJourney: apiData.Journey_Date || "",
+                    spotRateId: apiData.Spot_Rate_ID || "",
 
-                    // Map API data to Charges Data
-                    setChargesData(prev => ({
-                        ...prev,
-                        currency: apiData.Currency || "",
-                        paymentType: apiData.Payment_Type || "",
-                        dateOfJourney: apiData.Journey_Date || "",
-                        spotRateId: apiData.Spot_Rate_ID || "",
+                    // Rating Details (First row)
+                    ratingDetails: [
+                        {
+                            pcs: apiData.No_of_Pieces || "",
+                            weight: apiData.Gross_Weight || "",
+                            adjustedWeight: "",
+                            rcp: "",
+                            rateClass: apiData.Rate_Class || "",
+                            commodity: "",
+                            iataCode: "",
+                            serviceCode: "",
+                            chargeableWeight: apiData.Chargeable_Weight || "",
+                            iataRate: "",
+                            iataCharge: "",
+                            volume: "",
+                            origin: "",
+                            uld: "",
+                            description: "",
+                            ratePivot: apiData.Rate_Pivot || "",
+                            netCharge: apiData.Net_Rate || ""
+                        }
+                    ],
 
-                        // Rating Details (First row)
-                        ratingDetails: [
-                            {
-                                pcs: apiData.No_of_Pieces || "",
-                                weight: apiData.Gross_Weight || "",
-                                adjustedWeight: "",
-                                rcp: "",
-                                rateClass: apiData.Rate_Class || "",
-                                commodity: "",
-                                iataCode: "",
-                                serviceCode: "",
-                                chargeableWeight: apiData.Chargeable_Weight || "",
-                                iataRate: "",
-                                iataCharge: "",
-                                volume: "",
-                                origin: "",
-                                uld: "",
-                                description: "",
-                                ratePivot: apiData.Rate_Pivot || "",
-                                netCharge: apiData.Net_Rate || ""
-                            }
-                        ],
+                    // Charge Details (Row 1 & Row 2)
+                    chargeDetails: [
+                        {
+                            code: apiData.Charge_Details_Code || "",
+                            name: apiData.Charge_Details_Charge_Head_Name || "",
+                            charge: apiData.Charge_Details_Charge || "",
+                            ppcc: apiData.Charge_Details_PP_CC || "",
+                            dueCarrier: "",
+                            dueAgent: "",
+                            remarks: ""
+                        },
+                        {
+                            code: apiData["1_Charge_Details_Code"] || "",
+                            name: apiData["1_Charge_Details_Charge_Head_Name"] || "",
+                            charge: apiData["1_Charge_Details_Charge"] || "",
+                            ppcc: apiData["1_Charge_Details_PP_CC"] || "",
+                            dueCarrier: "",
+                            dueAgent: "",
+                            remarks: ""
+                        }
+                    ],
 
-                        // Charge Details (Row 1 & Row 2)
-                        chargeDetails: [
-                            {
-                                code: apiData.Charge_Details_Code || "",
-                                name: apiData.Charge_Details_Charge_Head_Name || "",
-                                charge: apiData.Charge_Details_Charge || "",
-                                ppcc: apiData.Charge_Details_PP_CC || "",
-                                dueCarrier: "",
-                                dueAgent: "",
-                                remarks: ""
-                            },
-                            {
-                                code: apiData["1_Charge_Details_Code"] || "",
-                                name: apiData["1_Charge_Details_Charge_Head_Name"] || "",
-                                charge: apiData["1_Charge_Details_Charge"] || "",
-                                ppcc: apiData["1_Charge_Details_PP_CC"] || "",
-                                dueCarrier: "",
-                                dueAgent: "",
-                                remarks: ""
-                            }
-                        ],
-
-                        // Preserve existing accounting
-                        accounting: prev.accounting
-                    }));
-                }
-            } catch (error) {
-                console.error("Error fetching AWB details:", error);
-            } finally {
-                setIsLoading(false);
+                    // Preserve existing accounting
+                    accounting: prev.accounting
+                }));
             }
-        };
-
-        fetchAwbDetails();
-    }, [awbFromQuery, typeFromQuery]);
+        } catch (error) {
+            console.error("Error fetching AWB details:", error);
+        } finally {
+            setIsLoading(false);
+        }
+    };
 
     useEffect(() => {
+        if (awbFromQuery) {
+            fetchAwbDetails(awbFromQuery);
+        }
+    }, [awbFromQuery]);
+
+    // Auto-switch to Charges tab and auto-close for external users
+    useEffect(() => {
+        if (autoCloseParam && !isLoading && generalData.origin) {
+            // Data has loaded successfully (generalData.origin indicates data is populated)
+            const timer = setTimeout(() => {
+                console.log("Auto-switching to Charges & Accounting tab...");
+                setActiveTab("charges");
+
+                // Close window after showing the tab switch
+                setTimeout(() => {
+                    console.log("Auto-closing window...");
+                    window.close();
+                }, 500);
+            }, 3000); // 3 second delay
+
+            return () => clearTimeout(timer);
+        }
+    }, [autoCloseParam, isLoading, generalData.origin]);
+
+    useEffect(() => {
+        // DISABLED: AWB Documents fetch and AI rule evaluation as per requirement on 2025-12-10
+        // Only iCargo data fetch is active now. To re-enable, remove the return statement below.
+        return;
+
         if (!awbFromQuery) return;
 
         const timer = setTimeout(() => {
@@ -892,6 +916,15 @@ export default function AwbPageComponent() {
                                     value={awbNumber}
                                     onChange={(e) => setAwbNumber(e.target.value)}
                                 />
+                                <button
+                                    onClick={() => fetchAwbDetails(`${awbPrefix}-${awbNumber.replace(/^-/, "")}`)}
+                                    className="ml-2 bg-blue-600 text-white p-1.5 rounded hover:bg-blue-700 transition-colors"
+                                    title="Search AWB"
+                                >
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">
+                                        <path strokeLinecap="round" strokeLinejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
+                                    </svg>
+                                </button>
                             </div>
                         </div>
 
