@@ -1139,7 +1139,7 @@ export default function AwbPageComponent() {
 
                                         {/* AGENT DETAILS */}
                                         <div className="border rounded p-3 bg-gray-50">
-                                            <div className="text-sm font-semibold mb-2">lol DETAILS</div>
+                                            <div className="text-sm font-semibold mb-2">AGENT DETAILS</div>
 
                                             <div className="grid grid-cols-12 gap-4">
                                                 <div className="col-span-2">
