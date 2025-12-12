@@ -538,7 +538,7 @@ export default function AwbPageComponent() {
     const fetchAwbDetails = async (searchValue: string) => {
         setIsLoading(true);
         try {
-            const response = await fetch("https://uat.aiqod.com:453/gibots-api/crud/iCargo", {
+            const response = await fetch("https://demo.aiqod.com:3443/gibots-api/crud/iCargo", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json"
@@ -699,7 +699,7 @@ export default function AwbPageComponent() {
             const fetchAwbDocuments = async () => {
                 try {
                     console.log("Fetching AWB Documents (Delayed)...");
-                    const response = await fetch("https://uat.aiqod.com:453/gibots-api/crud/iCargo", {
+                    const response = await fetch("https://demo.aiqod.com:3443/gibots-api/crud/iCargo", {
                         method: "POST",
                         headers: {
                             "Content-Type": "application/json"
@@ -825,7 +825,7 @@ export default function AwbPageComponent() {
 
                         console.log("Evaluating AI Rule...");
                         setIsEvaluatingRules(true);
-                        const ruleResponse = await fetch("https://uat.aiqod.com:453/aiqod-agent/agent/evaluateAIRule", {
+                        const ruleResponse = await fetch("https://demo.aiqod.com:3443/aiqod-agent/agent/evaluateAIRule", {
                             method: "POST",
                             headers: {
                                 "Content-Type": "application/json"
