@@ -668,18 +668,23 @@ export default function AwbPageComponent() {
     useEffect(() => {
         if (autoCloseParam && !isLoading && generalData.origin) {
             // Data has loaded successfully (generalData.origin indicates data is populated)
-            const timer = setTimeout(() => {
+            let closeTimer: NodeJS.Timeout;
+
+            const switchTimer = setTimeout(() => {
                 console.log("Auto-switching to Charges & Accounting tab...");
                 setActiveTab("charges");
 
-                // Close window after showing the tab switch
-                setTimeout(() => {
+                // Wait 5 seconds on Charges tab before closing
+                closeTimer = setTimeout(() => {
                     console.log("Auto-closing window...");
                     window.close();
-                }, 500);
-            }, 3000); // 3 second delay
+                }, 5000); // 5 second delay on Charges tab
+            }, 5000); // 5 second delay on General tab
 
-            return () => clearTimeout(timer);
+            return () => {
+                clearTimeout(switchTimer);
+                if (closeTimer) clearTimeout(closeTimer);
+            };
         }
     }, [autoCloseParam, isLoading, generalData.origin]);
 
