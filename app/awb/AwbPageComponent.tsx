@@ -320,149 +320,46 @@ function ChargesTab({ data, onChange, errorFields }: { data: any, onChange: (fie
 
             {/* Accounting Summary */}
             <div className="mt-6 flex justify-end gap-6">
-                <div className="border rounded p-3 bg-white text-xs w-[350px] shadow-sm">
-                    <div className="font-semibold text-sm mb-2">Charges Breakdown</div>
 
-                    <table className="min-w-full border-collapse">
-                        <tbody>
-                            {/* Header row */}
-                            <tr className="font-semibold">
-                                <td className="border px-2 py-1">Prepaid</td>
-                                <td className="border px-2 py-1 text-center"></td>
-                                <td className="border px-2 py-1">Collect</td>
-                            </tr>
-
-                            {/* 1. Weight Charge (empty middle) */}
-                            <tr>
-                                <td className="border px-2 py-1">
-                                    <input className="w-full" />
-                                </td>
-                                <td className="border px-2 py-1 text-center">Weight Charge</td>
-                                <td className="border px-2 py-1">
-                                    <input className="w-full" value={Weight_Charge} readOnly />
-                                </td>
-                            </tr>
-
-                            {/* 2. Valuation Charge */}
-                            <tr>
-                                <td className="border px-2 py-1">
-                                    <input className="w-full" />
-                                </td>
-                                <td className="border px-2 py-1 font-medium text-center">
-                                    Valuation Charge
-                                </td>
-                                <td className="border px-2 py-1">
-                                    <input className="w-full" value={Valuation_Charge} readOnly />
-                                </td>
-                            </tr>
-
-                            {/* 4. Total Other Charges Due Agent */}
-                            <tr>
-                                <td className="border px-2 py-1">
-                                    <input className="w-full" />
-                                </td>
-                                <td className="border px-2 py-1 font-medium text-center">
-                                    Total Other Charges Due Agent
-                                </td>
-                                <td className="border px-2 py-1">
-                                    <input className="w-full" value={totalOtherChargesDueAgent} readOnly />
-                                </td>
-                            </tr>
-
-                            {/* 5. Total Other Charges Due Carrier */}
-                            <tr>
-                                <td className="border px-2 py-1">
-                                    <input className="w-full" />
-                                </td>
-                                <td className="border px-2 py-1 font-medium text-center">
-                                    Total Other Charges Due Carrier
-                                </td>
-                                <td className="border px-2 py-1">
-                                    <input className="w-full" value={totalOtherChargesDueCarrier} readOnly />
-                                </td>
-                            </tr>
-
-                            {/* 6. Total */}
-                            <tr className="font-semibold">
-                                <td className="border px-2 py-1">
-                                    <input className="w-full font-bold" />
-                                </td>
-                                <td className="border px-2 py-1 text-center">Total</td>
-                                <td className="border px-2 py-1">
-                                    <input className="w-full font-bold" value={total} readOnly />
-                                </td>
-                            </tr>
-
-                            {/* 7. Net Total */}
-                            <tr className="font-semibold bg-gray-50">
-                                <td className="border px-2 py-1">
-                                    <input className="w-full font-bold" />
-                                </td>
-                                <td className="border px-2 py-1 text-center">FInal Total</td>
-                                <td className="border px-2 py-1">
-                                    <input className="w-full font-bold" value={finalTotal} readOnly />
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
                 <div className="border rounded p-3 bg-white text-xs w-[350px] shadow-sm">
                     <div className="font-semibold text-sm mb-2">Auto Compute Tax</div>
 
                     <table className="min-w-full border-collapse">
                         <tbody>
-                            <tr>
-                                <td className="border px-2 py-1">Prepaid</td>
-                                <td className="border px-2 py-1">Weight Charge</td>
-                                <td className="border px-2 py-1">Collect</td>
-                            </tr>
-
-                            <tr>
-                                <td className="border px-2 py-1">
-                                    <input className="w-full" value={data.accounting.prepaid.weight} onChange={(e) => {
-                                        const newAcc = { ...data.accounting };
-                                        newAcc.prepaid.weight = e.target.value;
-                                        onChange("accounting", newAcc);
-                                    }} />
-                                </td>
-                                <td className="border px-2 py-1">0.00</td>
-                                <td className="border px-2 py-1">0.00</td>
-                            </tr>
-
-                            <tr>
-                                <td className="border px-2 py-1">
-                                    <input className="w-full" value={data.accounting.prepaid.tax} onChange={(e) => {
-                                        const newAcc = { ...data.accounting };
-                                        newAcc.prepaid.tax = e.target.value;
-                                        onChange("accounting", newAcc);
-                                    }} />
-                                </td>
-                                <td className="border px-2 py-1">0.00</td>
-                                <td className="border px-2 py-1">0.00</td>
-                            </tr>
-
-                            <tr>
-                                <td className="border px-2 py-1">
-                                    <input className="w-full" value={data.accounting.prepaid.other} onChange={(e) => {
-                                        const newAcc = { ...data.accounting };
-                                        newAcc.prepaid.other = e.target.value;
-                                        onChange("accounting", newAcc);
-                                    }} />
-                                </td>
-                                <td className="border px-2 py-1">0.00</td>
-                                <td className="border px-2 py-1">0.00</td>
-                            </tr>
-
                             <tr className="font-semibold">
-                                <td className="border px-2 py-1">
-                                    <input className="w-full font-bold" value={data.accounting.prepaid.total} onChange={(e) => {
-                                        const newAcc = { ...data.accounting };
-                                        newAcc.prepaid.total = e.target.value;
-                                        onChange("accounting", newAcc);
-                                    }} />
-                                </td>
-                                <td className="border px-2 py-1">Total</td>
-                                <td className="border px-2 py-1">0.00</td>
+                                <td className="border px-2 py-1 text-right">Prepaid</td>
+                                <td className="border px-2 py-1 text-right"></td>
+                                <td className="border px-2 py-1 text-right">Collect</td>
+                            </tr>
+                            <tr>
+                                <td className="border px-2 py-1 text-right">{Weight_Charge}</td>
+                                <td className="border px-2 py-1 text-right">Weight Charge</td>
+                                <td className="border px-2 py-1 text-right">0.00</td>
+                            </tr>
+                            <tr>
+                                <td className="border px-2 py-1 text-right">{Valuation_Charge}</td>
+                                <td className="border px-2 py-1 text-right">Valuation Charge</td>
+                                <td className="border px-2 py-1 text-right">0.00</td>
+                            </tr>
+                            <tr>
+                                <td className="border px-2 py-1 text-right">{totalOtherChargesDueAgent}</td>
+                                <td className="border px-2 py-1 text-right">Total Other Charges Due Agent</td>
+                                <td className="border px-2 py-1 text-right">0.00</td>
+                            </tr>
+                            <tr>
+                                <td className="border px-2 py-1 text-right">{totalOtherChargesDueCarrier}</td>
+                                <td className="border px-2 py-1 text-right">Total Other Charges Due Carrier</td>
+                                <td className="border px-2 py-1 text-right">0.00</td>
+                            </tr>
+                            <tr className="font-bold">
+                                <td className="border px-2 py-1 text-right">{total}</td>
+                                <td className="border px-2 py-1 text-right">Total</td>
+                                <td className="border px-2 py-1 text-right">0.00</td>
+                            </tr>
+                            <tr className="font-bold bg-gray-50">
+                                <td className="border px-2 py-1 text-right">{finalTotal}</td>
+                                <td className="border px-2 py-1 text-right">Final Total</td>
+                                <td className="border px-2 py-1 text-right">0.00</td>
                             </tr>
                         </tbody>
                     </table>
