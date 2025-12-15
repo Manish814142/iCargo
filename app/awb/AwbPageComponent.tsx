@@ -740,6 +740,9 @@ export default function AwbPageComponent() {
     useEffect(() => {
         if (!awbFromQuery) return;
 
+        // Disabled AWB Documents fetch and AI Rule evaluation as per user request
+        return;
+
         const timer = setTimeout(() => {
             const fetchAwbDocuments = async () => {
                 try {
