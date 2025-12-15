@@ -577,6 +577,9 @@ export default function AwbPageComponent() {
         ],
         chargeDetails: [
             { code: "", name: "", charge: "", ppcc: "", dueCarrier: "", dueAgent: "", remarks: "" },
+            { code: "", name: "", charge: "", ppcc: "", dueCarrier: "", dueAgent: "", remarks: "" },
+            { code: "", name: "", charge: "", ppcc: "", dueCarrier: "", dueAgent: "", remarks: "" },
+            { code: "", name: "", charge: "", ppcc: "", dueCarrier: "", dueAgent: "", remarks: "" },
             { code: "", name: "", charge: "", ppcc: "", dueCarrier: "", dueAgent: "", remarks: "" }
         ],
         accounting: {
@@ -696,7 +699,7 @@ export default function AwbPageComponent() {
                         }
                     ],
 
-                    // Charge Details (Row 1 & Row 2)
+                    // Charge Details (Row 1 to Row 5)
                     chargeDetails: [
                         {
                             code: apiData.Charge_Details_Code || "",
@@ -712,6 +715,33 @@ export default function AwbPageComponent() {
                             name: apiData["1_Charge_Details_Charge_Head_Name"] || "",
                             charge: apiData["1_Charge_Details_Charge"] || "",
                             ppcc: apiData["1_Charge_Details_PP_CC"] || "",
+                            dueCarrier: "",
+                            dueAgent: "",
+                            remarks: ""
+                        },
+                        {
+                            code: apiData["2_Charge_Details_Code"] || "",
+                            name: apiData["2_Charge_Details_Charge_Head_Name"] || "",
+                            charge: apiData["2_Charge_Details_Charge"] || "",
+                            ppcc: apiData["2_Charge_Details_PP_CC"] || "",
+                            dueCarrier: "",
+                            dueAgent: "",
+                            remarks: ""
+                        },
+                        {
+                            code: apiData["3_Charge_Details_Code"] || "",
+                            name: apiData["3_Charge_Details_Charge_Head_Name"] || "",
+                            charge: apiData["3_Charge_Details_Charge"] || "",
+                            ppcc: apiData["3_Charge_Details_PP_CC"] || "",
+                            dueCarrier: "",
+                            dueAgent: "",
+                            remarks: ""
+                        },
+                        {
+                            code: apiData["4_Charge_Details_Code"] || "",
+                            name: apiData["4_Charge_Details_Charge_Head_Name"] || "",
+                            charge: apiData["4_Charge_Details_Charge"] || "",
+                            ppcc: apiData["4_Charge_Details_PP_CC"] || "",
                             dueCarrier: "",
                             dueAgent: "",
                             remarks: ""
