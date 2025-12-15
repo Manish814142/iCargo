@@ -3,7 +3,7 @@
 export const dynamic = "force-dynamic";
 
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 
 // ---------------------------------------------------------------------------
 // CHARGES & ACCOUNTING TAB UI
@@ -20,34 +20,31 @@ function ChargesTab({ data, onChange, errorFields }: { data: any, onChange: (fie
             : "border rounded px-2 py-1 w-full";
     };
 
+    const { total, totalOtherChargesDueAgent, totalOtherChargesDueCarrier, finalTotal, Valuation_Charge, Weight_Charge } = data;
+
     // Error Tooltip Component
     const ErrorTooltip = ({ fieldKey }: { fieldKey: string }) => {
         const errorMessages = errorFields.get(fieldKey);
         if (!errorMessages || errorMessages.length === 0) return null;
 
         return (
-            <div className="w-full max-w-full px-4 sm:px-6 lg:px-8">
-                <div className="mx-auto w-full">
-
-                    <div className="group relative inline-block ml-1">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4 text-red-600 cursor-help">
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z" />
-                        </svg>
-                        <div className="invisible group-hover:visible absolute left-0 top-6 z-50 max-w-md p-3 bg-gray-900 text-white text-xs rounded shadow-xl">
-                            {errorMessages.length === 1 ? (
-                                <div>{errorMessages[0]}</div>
-                            ) : (
-                                <div className="space-y-1">
-                                    {errorMessages.map((msg, idx) => (
-                                        <div key={idx} className="flex gap-2">
-                                            <span className="font-semibold">{idx + 1}.</span>
-                                            <span>{msg}</span>
-                                        </div>
-                                    ))}
+            <div className="group relative inline-block ml-1">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4 text-red-600 cursor-help">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z" />
+                </svg>
+                <div className="invisible group-hover:visible absolute left-0 top-6 z-50 max-w-md p-3 bg-gray-900 text-white text-xs rounded shadow-xl">
+                    {errorMessages.length === 1 ? (
+                        <div>{errorMessages[0]}</div>
+                    ) : (
+                        <div className="space-y-1">
+                            {errorMessages.map((msg, idx) => (
+                                <div key={idx} className="flex gap-2">
+                                    <span className="font-semibold">{idx + 1}.</span>
+                                    <span>{msg}</span>
                                 </div>
-                            )}
+                            ))}
                         </div>
-                    </div>
+                    )}
                 </div>
             </div>
         );
@@ -72,327 +69,407 @@ function ChargesTab({ data, onChange, errorFields }: { data: any, onChange: (fie
     };
 
     return (
-        <div className="w-full max-w-full px-4 sm:px-6 lg:px-8">
-            <div className="mx-auto w-full">
-                <div className="px-4 py-4 text-sm">
+        <div className="px-4 py-4 text-sm">
 
-                    {/* Top block */}
-                    <div className="border p-3 rounded bg-white shadow-sm">
-                        <div className="mb-2 font-semibold">
-                            Shipment Details - {data.origin || "DEL"} &gt; {data.destination || "MEL"} | {data.ratingDetails[0]?.pcs || "0"} pcs | {data.ratingDetails[0]?.weight || "0"} Kilogram | {data.ratingDetails[0]?.rateClass || "GEN"}
-                        </div>
+            {/* Top block */}
+            <div className="border p-3 rounded bg-white shadow-sm">
+                <div className="mb-2 font-semibold">
+                    Shipment Details - {data.origin || "DEL"} &gt; {data.destination || "MEL"} | {data.ratingDetails[0]?.pcs || "0"} pcs | {data.ratingDetails[0]?.weight || "0"} Kilogram | {data.ratingDetails[0]?.rateClass || "GEN"}
+                </div>
 
-                        {/* First grid */}
-                        <div className="grid grid-cols-12 gap-4 mb-3">
+                {/* First grid */}
+                <div className="grid grid-cols-12 gap-4 mb-3">
 
-                            <div className="col-span-2">
-                                <label className="text-xs text-gray-600 flex items-center">
-                                    Currency
-                                    <ErrorTooltip fieldKey="Currency" />
-                                </label>
-                                <input
-                                    className={getInputClass("Currency")}
-                                    value={data.currency}
-                                    onChange={(e) => onChange("currency", e.target.value)}
-                                />
-                            </div>
-
-                            <div className="col-span-2">
-                                <label className="text-xs text-gray-600">Charge Code</label>
-                                <input
-                                    className="border rounded px-2 py-1 w-full"
-                                    value={data.chargeCode}
-                                    onChange={(e) => onChange("chargeCode", e.target.value)}
-                                />
-                            </div>
-
-                            <div className="col-span-2">
-                                <label className="text-xs text-gray-600">Payment Type *</label>
-                                <input
-                                    className="border rounded px-2 py-1 w-full"
-                                    value={data.paymentType}
-                                    onChange={(e) => onChange("paymentType", e.target.value)}
-                                />
-                            </div>
-
-                            <div className="col-span-2">
-                                <label className="text-xs text-gray-600">Insurance Amt</label>
-                                <input
-                                    className="border rounded px-2 py-1 w-full"
-                                    value={data.insuranceAmt}
-                                    onChange={(e) => onChange("insuranceAmt", e.target.value)}
-                                />
-                            </div>
-
-                            <div className="col-span-2">
-                                <label className="text-xs text-gray-600">DV for customs</label>
-                                <input
-                                    className="border rounded px-2 py-1 w-full"
-                                    value={data.dvCustoms}
-                                    onChange={(e) => onChange("dvCustoms", e.target.value)}
-                                />
-                            </div>
-
-                            <div className="col-span-2">
-                                <label className="text-xs text-gray-600">DV for carriage</label>
-                                <input
-                                    className="border rounded px-2 py-1 w-full"
-                                    value={data.dvCarriage}
-                                    onChange={(e) => onChange("dvCarriage", e.target.value)}
-                                />
-                            </div>
-                        </div>
-
-                        {/* Second grid */}
-                        <div className="grid grid-cols-12 gap-4 mb-3">
-                            <div className="col-span-3">
-                                <label className="text-xs text-gray-600">Rated Customer *</label>
-                                <input
-                                    className="border rounded px-2 py-1 w-full"
-                                    value={data.ratedCustomer}
-                                    onChange={(e) => onChange("ratedCustomer", e.target.value)}
-                                />
-                            </div>
-
-                            <div className="col-span-3 flex items-end">
-                                <input
-                                    type="checkbox"
-                                    checked={data.applyHigherRate}
-                                    onChange={(e) => onChange("applyHigherRate", e.target.checked)}
-                                    className="mr-2"
-                                />
-                                <span className="text-xs">Apply Higher Weight Break Rate</span>
-                            </div>
-                        </div>
-
-                        {/* Third grid */}
-                        <div className="grid grid-cols-12 gap-4 mt-3">
-                            <div className="col-span-3">
-                                <label className="text-xs text-gray-600 flex items-center">
-                                    Date of Journey *
-                                    <ErrorTooltip fieldKey="Journey_Date" />
-                                </label>
-                                <input
-                                    type="date"
-                                    className={getInputClass("Journey_Date")}
-                                    value={data.dateOfJourney}
-                                    onChange={(e) => onChange("dateOfJourney", e.target.value)}
-                                />
-                            </div>
-
-                            <div className="col-span-3">
-                                <label className="text-xs text-gray-600">Unique Reference</label>
-                                <input
-                                    className="border rounded px-2 py-1 w-full"
-                                    value={data.uniqueRef}
-                                    onChange={(e) => onChange("uniqueRef", e.target.value)}
-                                />
-                            </div>
-
-                            <div className="col-span-3">
-                                <label className="text-xs text-gray-600">Spot Rate ID</label>
-                                <input
-                                    className="border rounded px-2 py-1 w-full"
-                                    value={data.spotRateId}
-                                    onChange={(e) => onChange("spotRateId", e.target.value)}
-                                />
-                            </div>
-
-                            <div className="col-span-3">
-                                <label className="text-xs text-gray-600">Construct Rate ID</label>
-                                <input
-                                    className="border rounded px-2 py-1 w-full"
-                                    value={data.constructRateId}
-                                    onChange={(e) => onChange("constructRateId", e.target.value)}
-                                />
-                            </div>
-                        </div>
+                    <div className="col-span-2">
+                        <label className="text-xs text-gray-600 flex items-center">
+                            Currency
+                            <ErrorTooltip fieldKey="Currency" />
+                        </label>
+                        <input
+                            className={getInputClass("Currency")}
+                            value={data.currency}
+                            onChange={(e) => onChange("currency", e.target.value)}
+                        />
                     </div>
 
-                    {/* Rating Details */}
-                    <div className="mt-6 font-semibold text-sm">RATING DETAILS</div>
+                    <div className="col-span-2">
+                        <label className="text-xs text-gray-600">Charge Code</label>
+                        <input
+                            className="border rounded px-2 py-1 w-full"
+                            value={data.chargeCode}
+                            onChange={(e) => onChange("chargeCode", e.target.value)}
+                        />
+                    </div>
 
-                    <div className="overflow-auto border rounded mt-2 text-xs bg-white">
-                        <table className="min-w-[1200px] w-full border-collapse">
+                    <div className="col-span-2">
+                        <label className="text-xs text-gray-600">Payment Type *</label>
+                        <input
+                            className="border rounded px-2 py-1 w-full"
+                            value={data.paymentType}
+                            onChange={(e) => onChange("paymentType", e.target.value)}
+                        />
+                    </div>
 
+                    <div className="col-span-2">
+                        <label className="text-xs text-gray-600">Insurance Amt</label>
+                        <input
+                            className="border rounded px-2 py-1 w-full"
+                            value={data.insuranceAmt}
+                            onChange={(e) => onChange("insuranceAmt", e.target.value)}
+                        />
+                    </div>
 
-                            <thead className="bg-gray-100">
-                                <tr>
-                                    {[
-                                        { label: "No of Pcs", key: "No_of_Pieces" },
-                                        { label: "Weight", key: "Gross_Weight" },
-                                        { label: "Adjusted Weight", key: "" },
-                                        { label: "RCP", key: "" },
-                                        { label: "Rate Class", key: "" },
-                                        { label: "Commodity", key: "" },
-                                        { label: "IATA Code", key: "" },
-                                        { label: "Service Code", key: "" },
-                                        { label: "Chargeable Weight", key: "Chargeable_Weight" },
-                                        { label: "IATA Rate", key: "" },
-                                        { label: "IATA Charge", key: "" },
-                                        { label: "Volume", key: "" },
-                                        { label: "Country of Origin", key: "" },
-                                        { label: "ULD", key: "" },
-                                        { label: "Description", key: "" },
-                                        { label: "Rate/Pivot", key: "" },
-                                        { label: "Net Charge", key: "" }
-                                    ].map((col, i) => (
-                                        <th key={i} className="border px-2 py-1">
-                                            <div className="flex items-center justify-center">
-                                                {col.label}
-                                                {col.key && <ErrorTooltip fieldKey={col.key} />}
-                                            </div>
-                                        </th>
-                                    ))}
-                                </tr>
-                            </thead>
+                    <div className="col-span-2">
+                        <label className="text-xs text-gray-600">DV for customs</label>
+                        <input
+                            className="border rounded px-2 py-1 w-full"
+                            value={data.dvCustoms}
+                            onChange={(e) => onChange("dvCustoms", e.target.value)}
+                        />
+                    </div>
 
-                            <tbody>
-                                {data.ratingDetails.map((row: any, i: number) => (
-                                    <tr key={i}>
-                                        {Object.keys(row).map((key, j) => (
-                                            <td key={j} className="border px-2 py-1">
-                                                <input
-                                                    className={`w-full bg-transparent focus:outline-none ${(key === "pcs" && errorFields.has("No_of_Pieces")) ||
-                                                        (key === "weight" && errorFields.has("Gross_Weight")) ||
-                                                        (key === "chargeableWeight" && errorFields.has("Chargeable_Weight")) ||
-                                                        (key === "rateClass" && errorFields.has("Rate_Class"))
-                                                        ? "bg-red-50 border border-red-500 rounded px-1"
-                                                        : ""
-                                                        }`}
-                                                    value={row[key]}
-                                                    onChange={(e) => handleRatingChange(i, key, e.target.value)}
-                                                />
-                                            </td>
-                                        ))}
-                                    </tr>
+                    <div className="col-span-2">
+                        <label className="text-xs text-gray-600">DV for carriage</label>
+                        <input
+                            className="border rounded px-2 py-1 w-full"
+                            value={data.dvCarriage}
+                            onChange={(e) => onChange("dvCarriage", e.target.value)}
+                        />
+                    </div>
+                </div>
+
+                {/* Second grid */}
+                <div className="grid grid-cols-12 gap-4 mb-3">
+                    <div className="col-span-3">
+                        <label className="text-xs text-gray-600">Rated Customer *</label>
+                        <input
+                            className="border rounded px-2 py-1 w-full"
+                            value={data.ratedCustomer}
+                            onChange={(e) => onChange("ratedCustomer", e.target.value)}
+                        />
+                    </div>
+
+                    <div className="col-span-3 flex items-end">
+                        <input
+                            type="checkbox"
+                            checked={data.applyHigherRate}
+                            onChange={(e) => onChange("applyHigherRate", e.target.checked)}
+                            className="mr-2"
+                        />
+                        <span className="text-xs">Apply Higher Weight Break Rate</span>
+                    </div>
+                </div>
+
+                {/* Third grid */}
+                <div className="grid grid-cols-12 gap-4 mt-3">
+                    <div className="col-span-3">
+                        <label className="text-xs text-gray-600 flex items-center">
+                            Date of Journey *
+                            <ErrorTooltip fieldKey="Journey_Date" />
+                        </label>
+                        <input
+                            type="date"
+                            className={getInputClass("Journey_Date")}
+                            value={data.dateOfJourney}
+                            onChange={(e) => onChange("dateOfJourney", e.target.value)}
+                        />
+                    </div>
+
+                    <div className="col-span-3">
+                        <label className="text-xs text-gray-600">Unique Reference</label>
+                        <input
+                            className="border rounded px-2 py-1 w-full"
+                            value={data.uniqueRef}
+                            onChange={(e) => onChange("uniqueRef", e.target.value)}
+                        />
+                    </div>
+
+                    <div className="col-span-3">
+                        <label className="text-xs text-gray-600">Spot Rate ID</label>
+                        <input
+                            className="border rounded px-2 py-1 w-full"
+                            value={data.spotRateId}
+                            onChange={(e) => onChange("spotRateId", e.target.value)}
+                        />
+                    </div>
+
+                    <div className="col-span-3">
+                        <label className="text-xs text-gray-600">Construct Rate ID</label>
+                        <input
+                            className="border rounded px-2 py-1 w-full"
+                            value={data.constructRateId}
+                            onChange={(e) => onChange("constructRateId", e.target.value)}
+                        />
+                    </div>
+                </div>
+            </div>
+
+            {/* Rating Details */}
+            <div className="mt-6 font-semibold text-sm">RATING DETAILS</div>
+
+            <div className="overflow-auto border rounded mt-2 text-xs bg-white">
+                <table className="min-w-[1200px] w-full border-collapse">
+                    <thead className="bg-gray-100">
+                        <tr>
+                            {[
+                                { label: "No of Pcs", key: "No_of_Pieces" },
+                                { label: "Weight", key: "Gross_Weight" },
+                                { label: "Adjusted Weight", key: "" },
+                                { label: "RCP", key: "" },
+                                { label: "Rate Class", key: "" },
+                                { label: "Commodity", key: "" },
+                                { label: "IATA Code", key: "" },
+                                { label: "Service Code", key: "" },
+                                { label: "Chargeable Weight", key: "Chargeable_Weight" },
+                                { label: "IATA Rate", key: "" },
+                                { label: "IATA Charge", key: "" },
+                                { label: "Volume", key: "" },
+                                { label: "Country of Origin", key: "" },
+                                { label: "ULD", key: "" },
+                                { label: "Description", key: "" },
+                                { label: "Rate/Pivot", key: "" },
+                                { label: "Net Charge", key: "" }
+                            ].map((col, i) => (
+                                <th key={i} className="border px-2 py-1">
+                                    <div className="flex items-center justify-center">
+                                        {col.label}
+                                        {col.key && <ErrorTooltip fieldKey={col.key} />}
+                                    </div>
+                                </th>
+                            ))}
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        {data.ratingDetails.map((row: any, i: number) => (
+                            <tr key={i}>
+                                {Object.keys(row).map((key, j) => (
+                                    <td key={j} className="border px-2 py-1">
+                                        <input
+                                            className={`w-full bg-transparent focus:outline-none ${(key === "pcs" && errorFields.has("No_of_Pieces")) ||
+                                                (key === "weight" && errorFields.has("Gross_Weight")) ||
+                                                (key === "chargeableWeight" && errorFields.has("Chargeable_Weight")) ||
+                                                (key === "rateClass" && errorFields.has("Rate_Class"))
+                                                ? "bg-red-50 border border-red-500 rounded px-1"
+                                                : ""
+                                                }`}
+                                            value={row[key]}
+                                            onChange={(e) => handleRatingChange(i, key, e.target.value)}
+                                        />
+                                    </td>
                                 ))}
-                            </tbody>
-                        </table>
-                    </div>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            </div>
 
-                    {/* Charge Details */}
-                    <div className="mt-6 font-semibold text-sm">CHARGE DETAILS</div>
+            {/* Charge Details */}
+            <div className="mt-6 font-semibold text-sm">CHARGE DETAILS</div>
 
-                    <div className="border rounded p-3 bg-white mt-2">
-                        <div className="text-xs mb-3">
-                            Payment Type *
-                            <input
-                                className="border ml-2 rounded px-2 py-1 w-20"
-                                value={data.paymentType}
-                                onChange={(e) => onChange("paymentType", e.target.value)}
-                            />
-                        </div>
+            <div className="border rounded p-3 bg-white mt-2">
+                <div className="text-xs mb-3">
+                    Payment Type *
+                    <input
+                        className="border ml-2 rounded px-2 py-1 w-20"
+                        value={data.paymentType}
+                        onChange={(e) => onChange("paymentType", e.target.value)}
+                    />
+                </div>
 
-                        <table className="min-w-full text-xs border-collapse border">
-                            <thead className="bg-gray-100">
-                                <tr>
-                                    {["", "Code", "Charge Head Name", "Charge", "PP/CC", "Due Carrier", "Due Agent", "Remarks"]
-                                        .map((h, i) => (
-                                            <th key={i} className="border px-2 py-1">{h}</th>
-                                        ))}
-                                </tr>
-                            </thead>
-
-                            <tbody>
-                                {data.chargeDetails.map((row: any, i: number) => (
-                                    <tr key={i}>
-                                        <td className="border px-2 py-1"><input type="checkbox" /></td>
-                                        <td className="border px-2 py-1">
-                                            <input className="w-full" value={row.code} onChange={(e) => handleChargeDetailChange(i, 1, e.target.value)} />
-                                        </td>
-                                        <td className="border px-2 py-1">
-                                            <input className="w-full" value={row.name} onChange={(e) => handleChargeDetailChange(i, 2, e.target.value)} />
-                                        </td>
-                                        <td className="border px-2 py-1">
-                                            <input className="w-full" value={row.charge} onChange={(e) => handleChargeDetailChange(i, 3, e.target.value)} />
-                                        </td>
-                                        <td className="border px-2 py-1">
-                                            <input className="w-full" value={row.ppcc} onChange={(e) => handleChargeDetailChange(i, 4, e.target.value)} />
-                                        </td>
-                                        <td className="border px-2 py-1">
-                                            <input className="w-full" value={row.dueCarrier} onChange={(e) => handleChargeDetailChange(i, 5, e.target.value)} />
-                                        </td>
-                                        <td className="border px-2 py-1">
-                                            <input className="w-full" value={row.dueAgent} onChange={(e) => handleChargeDetailChange(i, 6, e.target.value)} />
-                                        </td>
-                                        <td className="border px-2 py-1">
-                                            <input className="w-full" value={row.remarks || ""} onChange={(e) => handleChargeDetailChange(i, 7, e.target.value)} />
-                                        </td>
-                                    </tr>
+                <table className="min-w-full text-xs border-collapse border">
+                    <thead className="bg-gray-100">
+                        <tr>
+                            {["", "Code", "Charge Head Name", "Charge", "PP/CC", "Due Carrier", "Due Agent", "Remarks"]
+                                .map((h, i) => (
+                                    <th key={i} className="border px-2 py-1">{h}</th>
                                 ))}
-                            </tbody>
-                        </table>
-                    </div>
+                        </tr>
+                    </thead>
 
-                    {/* Accounting Summary */}
-                    <div className="mt-6 flex justify-end">
-                        <div className="border rounded p-3 bg-white text-xs w-[350px] shadow-sm">
-                            <div className="font-semibold text-sm mb-2">Auto Compute Tax</div>
+                    <tbody>
+                        {data.chargeDetails.map((row: any, i: number) => (
+                            <tr key={i}>
+                                <td className="border px-2 py-1"><input type="checkbox" /></td>
+                                <td className="border px-2 py-1">
+                                    <input className="w-full" value={row.code} onChange={(e) => handleChargeDetailChange(i, 1, e.target.value)} />
+                                </td>
+                                <td className="border px-2 py-1">
+                                    <input className="w-full" value={row.name} onChange={(e) => handleChargeDetailChange(i, 2, e.target.value)} />
+                                </td>
+                                <td className="border px-2 py-1">
+                                    <input className="w-full" value={row.charge} onChange={(e) => handleChargeDetailChange(i, 3, e.target.value)} />
+                                </td>
+                                <td className="border px-2 py-1">
+                                    <input className="w-full" value={row.ppcc} onChange={(e) => handleChargeDetailChange(i, 4, e.target.value)} />
+                                </td>
+                                <td className="border px-2 py-1">
+                                    <input className="w-full" value={row.dueCarrier} onChange={(e) => handleChargeDetailChange(i, 5, e.target.value)} />
+                                </td>
+                                <td className="border px-2 py-1">
+                                    <input className="w-full" value={row.dueAgent} onChange={(e) => handleChargeDetailChange(i, 6, e.target.value)} />
+                                </td>
+                                <td className="border px-2 py-1">
+                                    <input className="w-full" value={row.remarks || ""} onChange={(e) => handleChargeDetailChange(i, 7, e.target.value)} />
+                                </td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            </div>
 
-                            <table className="min-w-full border-collapse">
-                                <tbody>
-                                    <tr>
-                                        <td className="border px-2 py-1">Prepaid</td>
-                                        <td className="border px-2 py-1">Weight Charge</td>
-                                        <td className="border px-2 py-1">Collect</td>
-                                    </tr>
+            {/* Accounting Summary */}
+            <div className="mt-6 flex justify-end gap-6">
+                <div className="border rounded p-3 bg-white text-xs w-[350px] shadow-sm">
+                    <div className="font-semibold text-sm mb-2">Charges Breakdown</div>
 
-                                    <tr>
-                                        <td className="border px-2 py-1">
-                                            <input className="w-full" value={data.accounting.prepaid.weight} onChange={(e) => {
-                                                const newAcc = { ...data.accounting };
-                                                newAcc.prepaid.weight = e.target.value;
-                                                onChange("accounting", newAcc);
-                                            }} />
-                                        </td>
-                                        <td className="border px-2 py-1">0.00</td>
-                                        <td className="border px-2 py-1">0.00</td>
-                                    </tr>
+                    <table className="min-w-full border-collapse">
+                        <tbody>
+                            {/* Header row */}
+                            <tr className="font-semibold">
+                                <td className="border px-2 py-1">Prepaid</td>
+                                <td className="border px-2 py-1 text-center"></td>
+                                <td className="border px-2 py-1">Collect</td>
+                            </tr>
 
-                                    <tr>
-                                        <td className="border px-2 py-1">
-                                            <input className="w-full" value={data.accounting.prepaid.tax} onChange={(e) => {
-                                                const newAcc = { ...data.accounting };
-                                                newAcc.prepaid.tax = e.target.value;
-                                                onChange("accounting", newAcc);
-                                            }} />
-                                        </td>
-                                        <td className="border px-2 py-1">0.00</td>
-                                        <td className="border px-2 py-1">0.00</td>
-                                    </tr>
+                            {/* 1. Weight Charge (empty middle) */}
+                            <tr>
+                                <td className="border px-2 py-1">
+                                    <input className="w-full" />
+                                </td>
+                                <td className="border px-2 py-1 text-center">Weight Charge</td>
+                                <td className="border px-2 py-1">
+                                    <input className="w-full" value={Weight_Charge} readOnly />
+                                </td>
+                            </tr>
 
-                                    <tr>
-                                        <td className="border px-2 py-1">
-                                            <input className="w-full" value={data.accounting.prepaid.other} onChange={(e) => {
-                                                const newAcc = { ...data.accounting };
-                                                newAcc.prepaid.other = e.target.value;
-                                                onChange("accounting", newAcc);
-                                            }} />
-                                        </td>
-                                        <td className="border px-2 py-1">0.00</td>
-                                        <td className="border px-2 py-1">0.00</td>
-                                    </tr>
+                            {/* 2. Valuation Charge */}
+                            <tr>
+                                <td className="border px-2 py-1">
+                                    <input className="w-full" />
+                                </td>
+                                <td className="border px-2 py-1 font-medium text-center">
+                                    Valuation Charge
+                                </td>
+                                <td className="border px-2 py-1">
+                                    <input className="w-full" value={Valuation_Charge} readOnly />
+                                </td>
+                            </tr>
 
-                                    <tr className="font-semibold">
-                                        <td className="border px-2 py-1">
-                                            <input className="w-full font-bold" value={data.accounting.prepaid.total} onChange={(e) => {
-                                                const newAcc = { ...data.accounting };
-                                                newAcc.prepaid.total = e.target.value;
-                                                onChange("accounting", newAcc);
-                                            }} />
-                                        </td>
-                                        <td className="border px-2 py-1">Total</td>
-                                        <td className="border px-2 py-1">0.00</td>
-                                    </tr>
-                                </tbody>
-                            </table>
+                            {/* 4. Total Other Charges Due Agent */}
+                            <tr>
+                                <td className="border px-2 py-1">
+                                    <input className="w-full" />
+                                </td>
+                                <td className="border px-2 py-1 font-medium text-center">
+                                    Total Other Charges Due Agent
+                                </td>
+                                <td className="border px-2 py-1">
+                                    <input className="w-full" value={totalOtherChargesDueAgent} readOnly />
+                                </td>
+                            </tr>
 
-                            <button className="mt-3 w-full bg-gray-200 py-1 rounded text-sm">
-                                Compute Total
-                            </button>
-                        </div>
-                    </div>
+                            {/* 5. Total Other Charges Due Carrier */}
+                            <tr>
+                                <td className="border px-2 py-1">
+                                    <input className="w-full" />
+                                </td>
+                                <td className="border px-2 py-1 font-medium text-center">
+                                    Total Other Charges Due Carrier
+                                </td>
+                                <td className="border px-2 py-1">
+                                    <input className="w-full" value={totalOtherChargesDueCarrier} readOnly />
+                                </td>
+                            </tr>
+
+                            {/* 6. Total */}
+                            <tr className="font-semibold">
+                                <td className="border px-2 py-1">
+                                    <input className="w-full font-bold" />
+                                </td>
+                                <td className="border px-2 py-1 text-center">Total</td>
+                                <td className="border px-2 py-1">
+                                    <input className="w-full font-bold" value={total} readOnly />
+                                </td>
+                            </tr>
+
+                            {/* 7. Net Total */}
+                            <tr className="font-semibold bg-gray-50">
+                                <td className="border px-2 py-1">
+                                    <input className="w-full font-bold" />
+                                </td>
+                                <td className="border px-2 py-1 text-center">FInal Total</td>
+                                <td className="border px-2 py-1">
+                                    <input className="w-full font-bold" value={finalTotal} readOnly />
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div className="border rounded p-3 bg-white text-xs w-[350px] shadow-sm">
+                    <div className="font-semibold text-sm mb-2">Auto Compute Tax</div>
+
+                    <table className="min-w-full border-collapse">
+                        <tbody>
+                            <tr>
+                                <td className="border px-2 py-1">Prepaid</td>
+                                <td className="border px-2 py-1">Weight Charge</td>
+                                <td className="border px-2 py-1">Collect</td>
+                            </tr>
+
+                            <tr>
+                                <td className="border px-2 py-1">
+                                    <input className="w-full" value={data.accounting.prepaid.weight} onChange={(e) => {
+                                        const newAcc = { ...data.accounting };
+                                        newAcc.prepaid.weight = e.target.value;
+                                        onChange("accounting", newAcc);
+                                    }} />
+                                </td>
+                                <td className="border px-2 py-1">0.00</td>
+                                <td className="border px-2 py-1">0.00</td>
+                            </tr>
+
+                            <tr>
+                                <td className="border px-2 py-1">
+                                    <input className="w-full" value={data.accounting.prepaid.tax} onChange={(e) => {
+                                        const newAcc = { ...data.accounting };
+                                        newAcc.prepaid.tax = e.target.value;
+                                        onChange("accounting", newAcc);
+                                    }} />
+                                </td>
+                                <td className="border px-2 py-1">0.00</td>
+                                <td className="border px-2 py-1">0.00</td>
+                            </tr>
+
+                            <tr>
+                                <td className="border px-2 py-1">
+                                    <input className="w-full" value={data.accounting.prepaid.other} onChange={(e) => {
+                                        const newAcc = { ...data.accounting };
+                                        newAcc.prepaid.other = e.target.value;
+                                        onChange("accounting", newAcc);
+                                    }} />
+                                </td>
+                                <td className="border px-2 py-1">0.00</td>
+                                <td className="border px-2 py-1">0.00</td>
+                            </tr>
+
+                            <tr className="font-semibold">
+                                <td className="border px-2 py-1">
+                                    <input className="w-full font-bold" value={data.accounting.prepaid.total} onChange={(e) => {
+                                        const newAcc = { ...data.accounting };
+                                        newAcc.prepaid.total = e.target.value;
+                                        onChange("accounting", newAcc);
+                                    }} />
+                                </td>
+                                <td className="border px-2 py-1">Total</td>
+                                <td className="border px-2 py-1">0.00</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <button className="mt-3 w-full bg-gray-200 py-1 rounded text-sm">
+                        Compute Total
+                    </button>
                 </div>
             </div>
         </div>
@@ -408,7 +485,6 @@ export default function AwbPageComponent() {
     const searchParams = useSearchParams();
     const awbFromQuery = searchParams.get("awb");
     const typeFromQuery = searchParams.get("type") ?? "";
-    const autoCloseParam = searchParams.get("autoClose") === "true";
 
     const [activeTab, setActiveTab] = useState("general");
     const [isLoading, setIsLoading] = useState(false);
@@ -433,28 +509,23 @@ export default function AwbPageComponent() {
         if (!errorMessages || errorMessages.length === 0) return null;
 
         return (
-            <div className="w-full max-w-full px-4 sm:px-6 lg:px-8">
-                <div className="mx-auto w-full">
-
-                    <div className="group relative inline-block ml-1">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4 text-red-600 cursor-help">
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z" />
-                        </svg>
-                        <div className="invisible group-hover:visible absolute left-0 top-6 z-50 max-w-md p-3 bg-gray-900 text-white text-xs rounded shadow-xl">
-                            {errorMessages.length === 1 ? (
-                                <div>{errorMessages[0]}</div>
-                            ) : (
-                                <div className="space-y-1">
-                                    {errorMessages.map((msg, idx) => (
-                                        <div key={idx} className="flex gap-2">
-                                            <span className="font-semibold">{idx + 1}.</span>
-                                            <span>{msg}</span>
-                                        </div>
-                                    ))}
+            <div className="group relative inline-block ml-1">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4 text-red-600 cursor-help">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z" />
+                </svg>
+                <div className="invisible group-hover:visible absolute left-0 top-6 z-50 max-w-md p-3 bg-gray-900 text-white text-xs rounded shadow-xl">
+                    {errorMessages.length === 1 ? (
+                        <div>{errorMessages[0]}</div>
+                    ) : (
+                        <div className="space-y-1">
+                            {errorMessages.map((msg, idx) => (
+                                <div key={idx} className="flex gap-2">
+                                    <span className="font-semibold">{idx + 1}.</span>
+                                    <span>{msg}</span>
                                 </div>
-                            )}
+                            ))}
                         </div>
-                    </div>
+                    )}
                 </div>
             </div>
         );
@@ -506,15 +577,16 @@ export default function AwbPageComponent() {
         ],
         chargeDetails: [
             { code: "", name: "", charge: "", ppcc: "", dueCarrier: "", dueAgent: "", remarks: "" },
-            { code: "", name: "", charge: "", ppcc: "", dueCarrier: "", dueAgent: "", remarks: "" },
-            { code: "", name: "", charge: "", ppcc: "", dueCarrier: "", dueAgent: "", remarks: "" },
-            { code: "", name: "", charge: "", ppcc: "", dueCarrier: "", dueAgent: "", remarks: "" },
             { code: "", name: "", charge: "", ppcc: "", dueCarrier: "", dueAgent: "", remarks: "" }
         ],
         accounting: {
             prepaid: { weight: "", tax: "", other: "", total: "" },
             collect: { weight: "", tax: "", other: "", total: "" }
-        }
+        },
+        total: 0,
+        totalOtherChargesDueAgent: 0,
+        totalOtherChargesDueCarrier: 0,
+        finalTotal: 0
     });
 
     const handleGeneralChange = (field: string, value: any) => {
@@ -535,7 +607,15 @@ export default function AwbPageComponent() {
         }
     }, [awbFromQuery]);
 
-    const fetchAwbDetails = async (searchValue: string) => {
+
+    const [total, setTotal] = useState<number>(0);
+    const [totalOtherChargesDueAgent, setTotalOtherChargesDueAgent] = useState<number>(0);
+    const [totalOtherChargesDueCarrier, setTotalOtherChargesDueCarrier] = useState<number>(0);
+    const [finalTotal, setFinalTotal] = useState<number>(0);
+
+    const fetchAwbDetails = async (awbValue: string) => {
+        if (!awbValue) return;
+
         setIsLoading(true);
         try {
             const response = await fetch("https://demo.aiqod.com:3443/gibots-api/crud/iCargo", {
@@ -546,12 +626,30 @@ export default function AwbPageComponent() {
                 body: JSON.stringify({
                     collectionName: "iCargo",
                     searchKey: "AWB_No",
-                    searchValue: searchValue
+                    searchValue: awbValue
                 })
             });
 
             const result = await response.json();
             console.log("API Response:", result);
+            setTotal(result.data.Total || 0);
+            setTotalOtherChargesDueAgent(result.data.Total_Other_Charges_Due_Agent || 0);
+            setTotalOtherChargesDueCarrier(result.data.Total_Other_Charges_Due_Carrier || 0);
+            setFinalTotal(result.data.Total + result.data.Net_Rate || 0);
+
+
+            setChargesData(prev => ({
+                ...prev,
+                total: result.data.Total || 0,
+                totalOtherChargesDueAgent: result.data.Total_Other_Charges_Due_Agent || 0,
+                totalOtherChargesDueCarrier: result.data.Total_Other_Charges_Due_Carrier || 0,
+                finalTotal: result.data.Final_Total || 0,
+
+                // Add the new fields
+                Valuation_Charge: result.data.Valuation_Charge || 0,
+                Weight_Charge: result.data.Weight_Charge || 0
+            }));
+
 
             if ((result.status === 200 || result.status === 0) && result.data) {
                 const apiData = result.data;
@@ -598,7 +696,7 @@ export default function AwbPageComponent() {
                         }
                     ],
 
-                    // Charge Details (Row 1 to Row 5)
+                    // Charge Details (Row 1 & Row 2)
                     chargeDetails: [
                         {
                             code: apiData.Charge_Details_Code || "",
@@ -617,33 +715,6 @@ export default function AwbPageComponent() {
                             dueCarrier: "",
                             dueAgent: "",
                             remarks: ""
-                        },
-                        {
-                            code: apiData["2_Charge_Details_Code"] || "",
-                            name: apiData["2_Charge_Details_Charge_Head_Name"] || "",
-                            charge: apiData["2_Charge_Details_Charge"] || "",
-                            ppcc: apiData["2_Charge_Details_PP_CC"] || "",
-                            dueCarrier: "",
-                            dueAgent: "",
-                            remarks: ""
-                        },
-                        {
-                            code: apiData["3_Charge_Details_Code"] || "",
-                            name: apiData["3_Charge_Details_Charge_Head_Name"] || "",
-                            charge: apiData["3_Charge_Details_Charge"] || "",
-                            ppcc: apiData["3_Charge_Details_PP_CC"] || "",
-                            dueCarrier: "",
-                            dueAgent: "",
-                            remarks: ""
-                        },
-                        {
-                            code: apiData["4_Charge_Details_Code"] || "",
-                            name: apiData["4_Charge_Details_Charge_Head_Name"] || "",
-                            charge: apiData["4_Charge_Details_Charge"] || "",
-                            ppcc: apiData["4_Charge_Details_PP_CC"] || "",
-                            dueCarrier: "",
-                            dueAgent: "",
-                            remarks: ""
                         }
                     ],
 
@@ -658,41 +729,15 @@ export default function AwbPageComponent() {
         }
     };
 
+
+
     useEffect(() => {
         if (awbFromQuery) {
             fetchAwbDetails(awbFromQuery);
         }
-    }, [awbFromQuery]);
-
-    // Auto-switch to Charges tab and auto-close for external users
-    useEffect(() => {
-        if (autoCloseParam && !isLoading && generalData.origin) {
-            // Data has loaded successfully (generalData.origin indicates data is populated)
-            let closeTimer: NodeJS.Timeout;
-
-            const switchTimer = setTimeout(() => {
-                console.log("Auto-switching to Charges & Accounting tab...");
-                setActiveTab("charges");
-
-                // Wait 5 seconds on Charges tab before closing
-                closeTimer = setTimeout(() => {
-                    console.log("Auto-closing window...");
-                    window.close();
-                }, 5000); // 5 second delay on Charges tab
-            }, 5000); // 5 second delay on General tab
-
-            return () => {
-                clearTimeout(switchTimer);
-                if (closeTimer) clearTimeout(closeTimer);
-            };
-        }
-    }, [autoCloseParam, isLoading, generalData.origin]);
+    }, [awbFromQuery, typeFromQuery]);
 
     useEffect(() => {
-        // DISABLED: AWB Documents fetch and AI rule evaluation as per requirement on 2025-12-10
-        // Only iCargo data fetch is active now. To re-enable, remove the return statement below.
-        return;
-
         if (!awbFromQuery) return;
 
         const timer = setTimeout(() => {
@@ -883,495 +928,492 @@ export default function AwbPageComponent() {
     }, [awbFromQuery, typeFromQuery]);
 
     return (
-        <div className="w-full max-w-full px-4 sm:px-6 lg:px-8">
-            <div className="mx-auto w-full">
-                <div className="min-h-screen bg-gray-50 text-sans">
+        <div className="min-h-screen bg-gray-50 text-sans">
 
-                    {/* Header */}
-                    <header className="bg-white border-b border-gray-200">
-                        <div className="w-full max-w-full px-4 sm:px-6 lg:px-8 py-2 flex items-center justify-between">
+            {/* Header */}
+            <header className="bg-white border-b border-gray-200">
+                <div className="max-w-[1200px] mx-auto px-4 py-2 flex items-center gap-4">
 
-                            <div className="text-sm text-gray-600">🏠 Home</div>
+                    <div className="text-sm text-gray-600">🏠 Home</div>
 
-                            <div className="flex-1 text-center text-sm text-blue-600 font-semibold">
-                                Capture AWB / Screen : OPR026
+                    <div className="flex-1 text-center text-sm text-blue-600 font-semibold">
+                        Capture AWB / Screen : OPR026
+                    </div>
+
+                    <div className="flex items-center gap-3">
+                        <button
+                            onClick={() => router.push("/")}
+                            className="px-3 py-1 border rounded text-sm bg-gray-100 hover:bg-gray-200"
+                        >
+                            ← Back
+                        </button>
+
+                        <div className="text-sm text-gray-600">User: C_DIVESH.CHOUDHARY1</div>
+                    </div>
+
+                </div>
+            </header>
+
+            {/* SCREEN SWITCHER TAB */}
+            <div className="max-w-[1200px] mx-auto px-4 mt-3">
+                <div className="flex gap-2">
+
+                    <button
+                        onClick={() => router.push(`/awb?awb=${awbFromQuery}`)}
+                        className="px-4 py-2 rounded-t bg-blue-600 text-white text-sm font-semibold"
+                    >
+                        Capture AWB (OPR026)
+                    </button>
+
+                    <button
+                        onClick={() => router.push(`/opr352?awb=${awbFromQuery}`)}
+                        className="px-4 py-2 rounded-t bg-gray-200 text-sm"
+                    >
+                        FWB Messaging (OPR352)
+                    </button>
+
+                    {hasErrors && (
+                        <button
+                            onClick={() => setShowModal(true)}
+                            className="ml-2 p-1 text-red-600 hover:bg-red-50 rounded-full"
+                            title="Show Errors"
+                        >
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z" />
+                            </svg>
+                        </button>
+                    )}
+
+                </div>
+
+            </div>
+
+            {/* AWB Header Block */}
+            <section className="max-w-[1200px] mx-auto px-4 py-3">
+                <div className="bg-white border rounded-md p-3 shadow-sm">
+                    <div className="flex items-start gap-4">
+
+                        <div>
+                            <div className="text-xs text-gray-600 mb-1 flex items-center">
+                                AWB Number
+                                <ErrorTooltip fieldKey="AWB_No" />
                             </div>
-
-                            <div className="flex items-center gap-3">
+                            <div className="flex items-center gap-1">
+                                <input
+                                    type="text"
+                                    maxLength={3}
+                                    className={errorFields.has("AWB_No") ? "bg-red-100 border-2 border-red-500 px-2 py-1 rounded text-sm font-medium w-14 text-center" : "bg-yellow-300 border border-yellow-400 px-2 py-1 rounded text-sm font-medium w-14 text-center"}
+                                    value={awbPrefix}
+                                    onChange={(e) => setAwbPrefix(e.target.value)}
+                                />
+                                <input
+                                    type="text"
+                                    className={errorFields.has("AWB_No") ? "bg-red-100 border-2 border-red-500 px-3 py-1 rounded text-sm font-medium w-28" : "bg-yellow-200 border border-yellow-300 px-3 py-1 rounded text-sm font-medium w-28"}
+                                    value={awbNumber}
+                                    onChange={(e) => setAwbNumber(e.target.value)}
+                                />
                                 <button
-                                    onClick={() => router.push("/")}
-                                    className="px-3 py-1 border rounded text-sm bg-gray-100 hover:bg-gray-200"
+                                    onClick={() => {
+                                        if (awbPrefix && awbNumber) {
+                                            fetchAwbDetails(`${awbPrefix}-${awbNumber.replace(/^-/, "")}`);
+                                        }
+                                    }}
+                                    className="ml-2 p-1.5 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
+                                    title="Search AWB"
                                 >
-                                    ← Back
-                                </button>
-
-                                {/* <div className="text-sm text-gray-600">User: C_DIVESH.CHOUDHARY1</div> */}
-                            </div>
-
-                        </div>
-                    </header>
-
-                    {/* SCREEN SWITCHER TAB */}
-                    <div className="w-full max-w-full px-4 sm:px-6 lg:px-8 py-2 flex items-center justify-between">
-
-                        <div className="flex gap-2">
-
-                            <button
-                                onClick={() => router.push(`/awb?awb=${awbFromQuery}`)}
-                                className="px-4 py-2 rounded-t bg-blue-600 text-white text-sm font-semibold"
-                            >
-                                Capture AWB (OPR026)
-                            </button>
-
-                            <button
-                                onClick={() => router.push(`/opr352?awb=${awbFromQuery}`)}
-                                className="px-4 py-2 rounded-t bg-gray-200 text-sm"
-                            >
-                                FWB Messaging (OPR352)
-                            </button>
-
-                            {hasErrors && (
-                                <button
-                                    onClick={() => setShowModal(true)}
-                                    className="ml-2 p-1 text-red-600 hover:bg-red-50 rounded-full"
-                                    title="Show Errors"
-                                >
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
-                                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z" />
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4">
+                                        <path strokeLinecap="round" strokeLinejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
                                     </svg>
                                 </button>
-                            )}
+                            </div>
+                        </div>
 
+                        <div className="ml-6">
+                            <div className="text-xs text-gray-600 mb-1">Owner Code</div>
+                            <input
+                                className="border rounded px-2 py-1 w-20 text-sm"
+                                value={generalData.ownerCode}
+                                onChange={(e) => handleGeneralChange("ownerCode", e.target.value)}
+                            />
+                        </div>
+
+                        <div className="ml-6 flex-1">
+                            <div className="text-xs text-gray-600 mb-1">UBR No</div>
+                            <input
+                                className="border rounded px-2 py-1 w-full text-sm"
+                                value={generalData.ubrNo}
+                                onChange={(e) => handleGeneralChange("ubrNo", e.target.value)}
+                            />
+                        </div>
+
+                        <div className="ml-4 w-28">
+                            <div className="text-xs text-gray-600 mb-1">Group ID</div>
+                            <input
+                                className="border rounded px-2 py-1 w-full text-sm"
+                                value={generalData.groupId}
+                                onChange={(e) => handleGeneralChange("groupId", e.target.value)}
+                            />
+                        </div>
+
+                        <div className="ml-auto flex items-center gap-2">
+                            <button className="px-3 py-1 border rounded text-sm bg-gray-100">Select/Save Template</button>
+                            <button className="px-3 py-1 rounded text-sm bg-green-600 text-white">List</button>
+                            <button className="px-3 py-1 border rounded text-sm">Duplicate</button>
+                            <button className="px-3 py-1 border rounded text-sm">Clear</button>
                         </div>
 
                     </div>
+                </div>
+            </section>
 
-                    {/* AWB Header Block */}
-                    <section className="w-full max-w-full px-4 sm:px-6 lg:px-8 py-2 flex items-center justify-between">
+            {/* Main content wrapper */}
+            <main className="max-w-[1200px] mx-auto px-4">
 
-                        <div className="bg-white border rounded-md p-3 shadow-sm">
-                            <div className="flex items-start gap-4">
+                <div className="bg-white border rounded-md shadow-sm relative">
 
-                                <div>
-                                    <div className="text-xs text-gray-600 mb-1 flex items-center">
-                                        AWB Number
-                                        <ErrorTooltip fieldKey="AWB_No" />
-                                    </div>
-                                    <div className="flex items-center gap-1">
-                                        <input
-                                            type="text"
-                                            maxLength={3}
-                                            className={errorFields.has("AWB_No") ? "bg-red-100 border-2 border-red-500 px-2 py-1 rounded text-sm font-medium w-14 text-center" : "bg-yellow-300 border border-yellow-400 px-2 py-1 rounded text-sm font-medium w-14 text-center"}
-                                            value={awbPrefix}
-                                            onChange={(e) => setAwbPrefix(e.target.value)}
-                                        />
-                                        <input
-                                            type="text"
-                                            className={errorFields.has("AWB_No") ? "bg-red-100 border-2 border-red-500 px-3 py-1 rounded text-sm font-medium w-28" : "bg-yellow-200 border border-yellow-300 px-3 py-1 rounded text-sm font-medium w-28"}
-                                            value={awbNumber}
-                                            onChange={(e) => setAwbNumber(e.target.value)}
-                                        />
-                                        <button
-                                            onClick={() => fetchAwbDetails(`${awbPrefix}-${awbNumber.replace(/^-/, "")}`)}
-                                            className="ml-2 bg-blue-600 text-white p-1.5 rounded hover:bg-blue-700 transition-colors"
-                                            title="Search AWB"
-                                        >
-                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">
-                                                <path strokeLinecap="round" strokeLinejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
-                                            </svg>
-                                        </button>
-                                    </div>
-                                </div>
-
-                                <div className="ml-6">
-                                    <div className="text-xs text-gray-600 mb-1">Owner Code</div>
-                                    <input
-                                        className="border rounded px-2 py-1 w-20 text-sm"
-                                        value={generalData.ownerCode}
-                                        onChange={(e) => handleGeneralChange("ownerCode", e.target.value)}
-                                    />
-                                </div>
-
-                                <div className="ml-6 flex-1">
-                                    <div className="text-xs text-gray-600 mb-1">UBR No</div>
-                                    <input
-                                        className="border rounded px-2 py-1 w-full text-sm"
-                                        value={generalData.ubrNo}
-                                        onChange={(e) => handleGeneralChange("ubrNo", e.target.value)}
-                                    />
-                                </div>
-
-                                <div className="ml-4 w-28">
-                                    <div className="text-xs text-gray-600 mb-1">Group ID</div>
-                                    <input
-                                        className="border rounded px-2 py-1 w-full text-sm"
-                                        value={generalData.groupId}
-                                        onChange={(e) => handleGeneralChange("groupId", e.target.value)}
-                                    />
-                                </div>
-
-                                <div className="ml-auto flex items-center gap-2">
-                                    <button className="px-3 py-1 border rounded text-sm bg-gray-100">Select/Save Template</button>
-                                    <button className="px-3 py-1 rounded text-sm bg-green-600 text-white">List</button>
-                                    <button className="px-3 py-1 border rounded text-sm">Duplicate</button>
-                                    <button className="px-3 py-1 border rounded text-sm">Clear</button>
-                                </div>
-
-                            </div>
+                    {isLoading && (
+                        <div className="absolute inset-0 bg-white/50 flex items-center justify-center z-10">
+                            <div className="text-blue-600 font-semibold">Loading AWB Details...</div>
                         </div>
-                    </section>
+                    )}
 
-                    {/* Main content wrapper */}
-                    <main className="w-full max-w-full px-4 sm:px-6 lg:px-8 py-2 flex items-center justify-between">
-
-
-                        <div className="bg-white border rounded-md shadow-sm relative">
-
-                            {isLoading && (
-                                <div className="absolute inset-0 bg-white/50 flex items-center justify-center z-10">
-                                    <div className="text-blue-600 font-semibold">Loading AWB Details...</div>
-                                </div>
-                            )}
-
-                            {isEvaluatingRules && (
-                                <div className="absolute inset-0 bg-white/70 flex items-center justify-center z-20">
-                                    <div className="bg-white p-6 rounded-lg shadow-xl border-2 border-blue-500 flex flex-col items-center gap-3">
-                                        <div className="flex items-center gap-3">
-                                            <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
-                                            <div className="text-blue-600 font-semibold text-lg">Evaluating AI Rules...</div>
-                                        </div>
-                                        <div className="text-gray-600 text-sm">This may take 1-2 minutes. Please wait.</div>
-                                    </div>
-                                </div>
-                            )}
-
-                            {/* Toolbar */}
-                            <div className="px-3 py-2 border-b">
+                    {isEvaluatingRules && (
+                        <div className="absolute inset-0 bg-white/70 flex items-center justify-center z-20">
+                            <div className="bg-white p-6 rounded-lg shadow-xl border-2 border-blue-500 flex flex-col items-center gap-3">
                                 <div className="flex items-center gap-3">
-                                    <div className="text-sm text-gray-600">Houses (0)</div>
-                                    <div className="text-sm text-gray-600">HAWB Documents Finalized</div>
-                                    <div className="ml-auto text-sm text-blue-600">
-                                        Source : Portal Booking | Status : Executed
-                                    </div>
+                                    <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+                                    <div className="text-blue-600 font-semibold text-lg">Evaluating AI Rules...</div>
                                 </div>
-                            </div>
-
-                            {/* TABS */}
-                            <div className="px-3 pt-3">
-                                <nav className="flex gap-2 text-sm">
-
-                                    <button
-                                        onClick={() => setActiveTab("general")}
-                                        className={`px-3 py-2 bg-white border rounded-t ${activeTab === "general"
-                                            ? "text-blue-600 font-semibold"
-                                            : "text-gray-600"
-                                            }`}
-                                    >
-                                        General
-                                    </button>
-
-                                    <button
-                                        onClick={() => setActiveTab("charges")}
-                                        className={`px-3 py-2 bg-white border rounded-t ${activeTab === "charges"
-                                            ? "text-blue-600 font-semibold"
-                                            : "text-gray-600"
-                                            }`}
-                                    >
-                                        Charges and Accounting
-                                    </button>
-
-                                    <button className="px-3 py-2 bg-white border rounded-t text-gray-600">
-                                        Additional Information
-                                    </button>
-                                    <button className="px-3 py-2 bg-white border rounded-t text-gray-600">
-                                        Booking Details
-                                    </button>
-                                    <button className="px-3 py-2 bg-white border rounded-t text-gray-600">
-                                        Electronic Data Status
-                                    </button>
-
-                                </nav>
-                            </div>
-
-                            {/* TAB CONTENT AREA */}
-                            <div className="px-4 pb-4 pt-2">
-
-                                {/* GENERAL TAB CONTENT */}
-                                {activeTab === "general" && (
-                                    <>
-                                        {/* TOP ROW */}
-                                        <div className="grid grid-cols-12 gap-4 items-center">
-
-                                            <div className="col-span-2">
-                                                <label className="text-xs text-gray-600 flex items-center">
-                                                    Origin *
-                                                    <ErrorTooltip fieldKey="Origin_Code" />
-                                                </label>
-                                                <input
-                                                    className={getInputClass("Origin_Code")}
-                                                    value={generalData.origin}
-                                                    onChange={(e) => handleGeneralChange("origin", e.target.value)}
-                                                />
-                                            </div>
-
-                                            <div className="col-span-2">
-                                                <label className="text-xs text-gray-600 flex items-center">
-                                                    Destination *
-                                                    <ErrorTooltip fieldKey="Destination_Code" />
-                                                </label>
-                                                <input
-                                                    className={getInputClass("Destination_Code")}
-                                                    value={generalData.destination}
-                                                    onChange={(e) => handleGeneralChange("destination", e.target.value)}
-                                                />
-                                            </div>
-
-                                            <div className="col-span-3">
-                                                <label className="text-xs text-gray-600">Routing *</label>
-                                                <input
-                                                    className="w-full border rounded px-2 py-1"
-                                                    value={generalData.routing}
-                                                    onChange={(e) => handleGeneralChange("routing", e.target.value)}
-                                                />
-                                            </div>
-
-                                            <div className="col-span-3">
-                                                <label className="text-xs text-gray-600">Requested Flight</label>
-                                                <input
-                                                    className="w-full border rounded px-2 py-1"
-                                                    value={generalData.requestedFlight}
-                                                    onChange={(e) => handleGeneralChange("requestedFlight", e.target.value)}
-                                                />
-                                            </div>
-
-                                            <div className="col-span-2">
-                                                <label className="text-xs text-gray-600 flex items-center">
-                                                    SCC
-                                                    <ErrorTooltip fieldKey="SSC_Code" />
-                                                </label>
-                                                <input
-                                                    className={getInputClass("SSC_Code")}
-                                                    value={generalData.scc}
-                                                    onChange={(e) => handleGeneralChange("scc", e.target.value)}
-                                                />
-                                            </div>
-
-                                            <div className="col-span-2">
-                                                <label className="text-xs text-gray-600 flex items-center">
-                                                    Product
-                                                    <ErrorTooltip fieldKey="Product_Code" />
-                                                </label>
-                                                <input
-                                                    className={getInputClass("Product_Code")}
-                                                    value={generalData.product}
-                                                    onChange={(e) => handleGeneralChange("product", e.target.value)}
-                                                />
-                                            </div>
-
-                                        </div>
-
-                                        <div className="h-4" />
-
-                                        {/* AGENT DETAILS */}
-                                        <div className="border rounded p-3 bg-gray-50">
-                                            <div className="text-sm font-semibold mb-2">AGENT DETAILS</div>
-
-                                            <div className="grid grid-cols-12 gap-4">
-                                                <div className="col-span-2">
-                                                    <label className="text-xs text-gray-600 flex items-center">
-                                                        Code
-                                                        <ErrorTooltip fieldKey="Agent_Code" />
-                                                    </label>
-                                                    <input
-                                                        className={getInputClass("Agent_Code")}
-                                                        value={generalData.agentCode}
-                                                        onChange={(e) => handleGeneralChange("agentCode", e.target.value)}
-                                                    />
-                                                </div>
-
-                                                <div className="col-span-5">
-                                                    <label className="text-xs text-gray-600">Name</label>
-                                                    <input
-                                                        className="w-full border rounded px-2 py-1"
-                                                        value={generalData.agentName}
-                                                        onChange={(e) => handleGeneralChange("agentName", e.target.value)}
-                                                    />
-                                                </div>
-
-                                                <div className="col-span-2">
-                                                    <label className="text-xs text-gray-600 flex items-center">
-                                                        IATA Code
-                                                        <ErrorTooltip fieldKey="IATA_Code" />
-                                                    </label>
-                                                    <input
-                                                        className={getInputClass("IATA_Code")}
-                                                        value={generalData.iataCode}
-                                                        onChange={(e) => handleGeneralChange("iataCode", e.target.value)}
-                                                    />
-                                                </div>
-
-                                                <div className="col-span-2">
-                                                    <label className="text-xs text-gray-600">CASS Code</label>
-                                                    <input
-                                                        className="w-full border rounded px-2 py-1"
-                                                        value={generalData.cassCode}
-                                                        onChange={(e) => handleGeneralChange("cassCode", e.target.value)}
-                                                    />
-                                                </div>
-
-                                                <div className="col-span-1 flex items-end">
-                                                    <button className="px-3 py-1 border rounded text-sm">Tax Info</button>
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        <div className="h-4" />
-
-                                        {/* SHIPPER/CONSIGNEE */}
-                                        <div className="grid grid-cols-12 gap-4">
-
-                                            <div className="col-span-6 border rounded p-3 bg-white">
-                                                <div className="text-sm font-semibold mb-2">
-                                                    SHIPPER / CONSIGNEE DETAILS
-                                                </div>
-
-                                                <div className="text-xs text-gray-600 mb-1">
-                                                    Shipper : {generalData.shipper}
-                                                </div>
-
-                                                <div className="grid grid-cols-12 gap-2 mt-2">
-                                                    <div className="col-span-6">
-                                                        <label className="text-xs text-gray-600">Code *</label>
-                                                        <input
-                                                            className="w-full border rounded px-2 py-1"
-                                                            value={generalData.shipperCode}
-                                                            onChange={(e) => handleGeneralChange("shipperCode", e.target.value)}
-                                                        />
-                                                    </div>
-
-                                                    <div className="col-span-6">
-                                                        <label className="text-xs text-gray-600">A/C Number</label>
-                                                        <input
-                                                            className="w-full border rounded px-2 py-1"
-                                                            value={generalData.shipperAc}
-                                                            onChange={(e) => handleGeneralChange("shipperAc", e.target.value)}
-                                                        />
-                                                    </div>
-                                                </div>
-
-                                                <div className="mt-3 flex gap-2">
-                                                    <button className="px-3 py-1 border rounded text-sm bg-gray-100">Capture Irregularity</button>
-                                                    <button className="px-3 py-1 border rounded text-sm">Split Shipment</button>
-                                                    <button className="px-3 py-1 border rounded text-sm">HAWB</button>
-                                                    <button className="px-3 py-1 border rounded text-sm">Accept</button>
-                                                </div>
-                                            </div>
-
-                                            <div className="col-span-6 border rounded p-3 bg-white">
-                                                <div className="text-sm font-semibold mb-2">CONSIGNEE</div>
-
-                                                <div className="text-xs text-gray-600 mb-1">
-                                                    Consignee : {generalData.consignee}
-                                                </div>
-
-                                                <div className="grid grid-cols-12 gap-2 mt-2">
-                                                    <div className="col-span-6">
-                                                        <label className="text-xs text-gray-600">Code *</label>
-                                                        <input
-                                                            className="w-full border rounded px-2 py-1"
-                                                            value={generalData.consigneeCode}
-                                                            onChange={(e) => handleGeneralChange("consigneeCode", e.target.value)}
-                                                        />
-                                                    </div>
-
-                                                    <div className="col-span-6">
-                                                        <label className="text-xs text-gray-600">A/C Number</label>
-                                                        <input
-                                                            className="w-full border rounded px-2 py-1"
-                                                            value={generalData.consigneeAc}
-                                                            onChange={(e) => handleGeneralChange("consigneeAc", e.target.value)}
-                                                        />
-                                                    </div>
-                                                </div>
-
-                                                <div className="mt-3 flex justify-end gap-2">
-                                                    <button className="px-3 py-1 border rounded text-sm bg-blue-600 text-white">View/Upload Files</button>
-                                                    <button className="px-3 py-1 border rounded text-sm bg-gray-200">Print</button>
-                                                    <button className="px-3 py-1 border rounded text-sm bg-blue-600 text-white">Send</button>
-                                                </div>
-                                            </div>
-
-                                        </div>
-
-                                        <div className="h-6" />
-
-                                    </>
-                                )}
-
-                                {/* CHARGES TAB CONTENT */}
-                                {activeTab === "charges" && <ChargesTab data={chargesData} onChange={handleChargesChange} errorFields={errorFields} />}
-
-                            </div>
-
-                            {/* Footer actions */}
-                            <div className="px-4 py-3 border-t bg-gray-50 flex items-center gap-2 justify-between">
-                                <div className="flex items-center gap-2">
-                                    <button className="px-3 py-1 border rounded text-sm bg-gray-100">Delete AWB</button>
-                                    <button className="px-3 py-1 border rounded text-sm">Update Prenomination</button>
-                                    <button className="px-3 py-1 border rounded text-sm">Save</button>
-                                </div>
-
-                                <div className="flex items-center gap-2">
-                                    <button className="px-3 py-1 border rounded text-sm">Close</button>
-                                    {/* <div className="text-sm text-gray-500">
-                                        Last updated by: C_DIVESH.CHOUDHARY1
-                                    </div> */}
-                                </div>
-                            </div>
-
-                        </div>
-                    </main>
-
-                    {/* Error/Success Modal */}
-                    {showModal && (
-                        <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50">
-                            <div className="bg-white rounded-lg shadow-lg w-full max-w-lg p-6 relative">
-                                <button
-                                    onClick={() => setShowModal(false)}
-                                    className="absolute top-4 right-4 text-gray-500 hover:text-gray-700"
-                                >
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
-                                        <path strokeLinecap="round" strokeLinejoin="round" d="M6 18 18 6M6 6l12 12" />
-                                    </svg>
-                                </button>
-                                <h2 className="text-xl font-bold mb-4">{modalTitle}</h2>
-                                <div className="max-h-[60vh] overflow-y-auto">
-                                    {modalData ? (
-                                        <ul className="space-y-2">
-                                            {modalData.map((err: any, idx: number) => {
-                                                const key = Object.keys(err)[0];
-                                                const value = err[key];
-                                                return (
-                                                    <li key={idx} className="text-sm text-black">
-                                                        <span className="font-semibold">{idx + 1}. {key}:</span> {value}
-                                                    </li>
-                                                );
-                                            })}
-                                        </ul>
-                                    ) : (
-                                        <div className="text-green-600 font-medium flex items-center gap-2">
-                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
-                                                <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
-                                            </svg>
-                                            Success! No errors found.
-                                        </div>
-                                    )}
-                                </div>
+                                <div className="text-gray-600 text-sm">This may take 1-2 minutes. Please wait.</div>
                             </div>
                         </div>
                     )}
+
+                    {/* Toolbar */}
+                    <div className="px-3 py-2 border-b">
+                        <div className="flex items-center gap-3">
+                            <div className="text-sm text-gray-600">Houses (0)</div>
+                            <div className="text-sm text-gray-600">HAWB Documents Finalized</div>
+                            <div className="ml-auto text-sm text-blue-600">
+                                Source : Portal Booking | Status : Executed
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* TABS */}
+                    <div className="px-3 pt-3">
+                        <nav className="flex gap-2 text-sm">
+
+                            <button
+                                onClick={() => setActiveTab("general")}
+                                className={`px-3 py-2 bg-white border rounded-t ${activeTab === "general"
+                                    ? "text-blue-600 font-semibold"
+                                    : "text-gray-600"
+                                    }`}
+                            >
+                                General
+                            </button>
+
+                            <button
+                                onClick={() => setActiveTab("charges")}
+                                className={`px-3 py-2 bg-white border rounded-t ${activeTab === "charges"
+                                    ? "text-blue-600 font-semibold"
+                                    : "text-gray-600"
+                                    }`}
+                            >
+                                Charges and Accounting
+                            </button>
+
+                            <button className="px-3 py-2 bg-white border rounded-t text-gray-600">
+                                Additional Information
+                            </button>
+                            <button className="px-3 py-2 bg-white border rounded-t text-gray-600">
+                                Booking Details
+                            </button>
+                            <button className="px-3 py-2 bg-white border rounded-t text-gray-600">
+                                Electronic Data Status
+                            </button>
+
+                        </nav>
+                    </div>
+
+                    {/* TAB CONTENT AREA */}
+                    <div className="px-4 pb-4 pt-2">
+
+                        {/* GENERAL TAB CONTENT */}
+                        {activeTab === "general" && (
+                            <>
+                                {/* TOP ROW */}
+                                <div className="grid grid-cols-12 gap-4 items-center">
+
+                                    <div className="col-span-2">
+                                        <label className="text-xs text-gray-600 flex items-center">
+                                            Origin *
+                                            <ErrorTooltip fieldKey="Origin_Code" />
+                                        </label>
+                                        <input
+                                            className={getInputClass("Origin_Code")}
+                                            value={generalData.origin}
+                                            onChange={(e) => handleGeneralChange("origin", e.target.value)}
+                                        />
+                                    </div>
+
+                                    <div className="col-span-2">
+                                        <label className="text-xs text-gray-600 flex items-center">
+                                            Destination *
+                                            <ErrorTooltip fieldKey="Destination_Code" />
+                                        </label>
+                                        <input
+                                            className={getInputClass("Destination_Code")}
+                                            value={generalData.destination}
+                                            onChange={(e) => handleGeneralChange("destination", e.target.value)}
+                                        />
+                                    </div>
+
+                                    <div className="col-span-3">
+                                        <label className="text-xs text-gray-600">Routing *</label>
+                                        <input
+                                            className="w-full border rounded px-2 py-1"
+                                            value={generalData.routing}
+                                            onChange={(e) => handleGeneralChange("routing", e.target.value)}
+                                        />
+                                    </div>
+
+                                    <div className="col-span-3">
+                                        <label className="text-xs text-gray-600">Requested Flight</label>
+                                        <input
+                                            className="w-full border rounded px-2 py-1"
+                                            value={generalData.requestedFlight}
+                                            onChange={(e) => handleGeneralChange("requestedFlight", e.target.value)}
+                                        />
+                                    </div>
+
+                                    <div className="col-span-2">
+                                        <label className="text-xs text-gray-600 flex items-center">
+                                            SCC
+                                            <ErrorTooltip fieldKey="SSC_Code" />
+                                        </label>
+                                        <input
+                                            className={getInputClass("SSC_Code")}
+                                            value={generalData.scc}
+                                            onChange={(e) => handleGeneralChange("scc", e.target.value)}
+                                        />
+                                    </div>
+
+                                    <div className="col-span-2">
+                                        <label className="text-xs text-gray-600 flex items-center">
+                                            Product
+                                            <ErrorTooltip fieldKey="Product_Code" />
+                                        </label>
+                                        <input
+                                            className={getInputClass("Product_Code")}
+                                            value={generalData.product}
+                                            onChange={(e) => handleGeneralChange("product", e.target.value)}
+                                        />
+                                    </div>
+
+                                </div>
+
+                                <div className="h-4" />
+
+                                {/* AGENT DETAILS */}
+                                <div className="border rounded p-3 bg-gray-50">
+                                    <div className="text-sm font-semibold mb-2">AGENT DETAILS</div>
+
+                                    <div className="grid grid-cols-12 gap-4">
+                                        <div className="col-span-2">
+                                            <label className="text-xs text-gray-600 flex items-center">
+                                                Code
+                                                <ErrorTooltip fieldKey="Agent_Code" />
+                                            </label>
+                                            <input
+                                                className={getInputClass("Agent_Code")}
+                                                value={generalData.agentCode}
+                                                onChange={(e) => handleGeneralChange("agentCode", e.target.value)}
+                                            />
+                                        </div>
+
+                                        <div className="col-span-5">
+                                            <label className="text-xs text-gray-600">Name</label>
+                                            <input
+                                                className="w-full border rounded px-2 py-1"
+                                                value={generalData.agentName}
+                                                onChange={(e) => handleGeneralChange("agentName", e.target.value)}
+                                            />
+                                        </div>
+
+                                        <div className="col-span-2">
+                                            <label className="text-xs text-gray-600 flex items-center">
+                                                IATA Code
+                                                <ErrorTooltip fieldKey="IATA_Code" />
+                                            </label>
+                                            <input
+                                                className={getInputClass("IATA_Code")}
+                                                value={generalData.iataCode}
+                                                onChange={(e) => handleGeneralChange("iataCode", e.target.value)}
+                                            />
+                                        </div>
+
+                                        <div className="col-span-2">
+                                            <label className="text-xs text-gray-600">CASS Code</label>
+                                            <input
+                                                className="w-full border rounded px-2 py-1"
+                                                value={generalData.cassCode}
+                                                onChange={(e) => handleGeneralChange("cassCode", e.target.value)}
+                                            />
+                                        </div>
+
+                                        <div className="col-span-1 flex items-end">
+                                            <button className="px-3 py-1 border rounded text-sm">Tax Info</button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="h-4" />
+
+                                {/* SHIPPER/CONSIGNEE */}
+                                <div className="grid grid-cols-12 gap-4">
+
+                                    <div className="col-span-6 border rounded p-3 bg-white">
+                                        <div className="text-sm font-semibold mb-2">
+                                            SHIPPER / CONSIGNEE DETAILS
+                                        </div>
+
+                                        <div className="text-xs text-gray-600 mb-1">
+                                            Shipper : {generalData.shipper}
+                                        </div>
+
+                                        <div className="grid grid-cols-12 gap-2 mt-2">
+                                            <div className="col-span-6">
+                                                <label className="text-xs text-gray-600">Code *</label>
+                                                <input
+                                                    className="w-full border rounded px-2 py-1"
+                                                    value={generalData.shipperCode}
+                                                    onChange={(e) => handleGeneralChange("shipperCode", e.target.value)}
+                                                />
+                                            </div>
+
+                                            <div className="col-span-6">
+                                                <label className="text-xs text-gray-600">A/C Number</label>
+                                                <input
+                                                    className="w-full border rounded px-2 py-1"
+                                                    value={generalData.shipperAc}
+                                                    onChange={(e) => handleGeneralChange("shipperAc", e.target.value)}
+                                                />
+                                            </div>
+                                        </div>
+
+                                        <div className="mt-3 flex gap-2">
+                                            <button className="px-3 py-1 border rounded text-sm bg-gray-100">Capture Irregularity</button>
+                                            <button className="px-3 py-1 border rounded text-sm">Split Shipment</button>
+                                            <button className="px-3 py-1 border rounded text-sm">HAWB</button>
+                                            <button className="px-3 py-1 border rounded text-sm">Accept</button>
+                                        </div>
+                                    </div>
+
+                                    <div className="col-span-6 border rounded p-3 bg-white">
+                                        <div className="text-sm font-semibold mb-2">CONSIGNEE</div>
+
+                                        <div className="text-xs text-gray-600 mb-1">
+                                            Consignee : {generalData.consignee}
+                                        </div>
+
+                                        <div className="grid grid-cols-12 gap-2 mt-2">
+                                            <div className="col-span-6">
+                                                <label className="text-xs text-gray-600">Code *</label>
+                                                <input
+                                                    className="w-full border rounded px-2 py-1"
+                                                    value={generalData.consigneeCode}
+                                                    onChange={(e) => handleGeneralChange("consigneeCode", e.target.value)}
+                                                />
+                                            </div>
+
+                                            <div className="col-span-6">
+                                                <label className="text-xs text-gray-600">A/C Number</label>
+                                                <input
+                                                    className="w-full border rounded px-2 py-1"
+                                                    value={generalData.consigneeAc}
+                                                    onChange={(e) => handleGeneralChange("consigneeAc", e.target.value)}
+                                                />
+                                            </div>
+                                        </div>
+
+                                        <div className="mt-3 flex justify-end gap-2">
+                                            <button className="px-3 py-1 border rounded text-sm bg-blue-600 text-white">View/Upload Files</button>
+                                            <button className="px-3 py-1 border rounded text-sm bg-gray-200">Print</button>
+                                            <button className="px-3 py-1 border rounded text-sm bg-blue-600 text-white">Send</button>
+                                        </div>
+                                    </div>
+
+                                </div>
+
+                                <div className="h-6" />
+
+                            </>
+                        )}
+
+                        {/* CHARGES TAB CONTENT */}
+                        {activeTab === "charges" && <ChargesTab data={chargesData} onChange={handleChargesChange} errorFields={errorFields} />}
+
+                    </div>
+
+                    {/* Footer actions */}
+                    <div className="px-4 py-3 border-t bg-gray-50 flex items-center gap-2 justify-between">
+                        <div className="flex items-center gap-2">
+                            <button className="px-3 py-1 border rounded text-sm bg-gray-100">Delete AWB</button>
+                            <button className="px-3 py-1 border rounded text-sm">Update Prenomination</button>
+                            <button className="px-3 py-1 border rounded text-sm">Save</button>
+                        </div>
+
+                        <div className="flex items-center gap-2">
+                            <button className="px-3 py-1 border rounded text-sm">Close</button>
+                            <div className="text-sm text-gray-500">
+                                Last updated by: C_DIVESH.CHOUDHARY1
+                            </div>
+                        </div>
+                    </div>
+
                 </div>
-            </div>
+            </main>
+
+            {/* Error/Success Modal */}
+            {showModal && (
+                <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50">
+                    <div className="bg-white rounded-lg shadow-lg w-full max-w-lg p-6 relative">
+                        <button
+                            onClick={() => setShowModal(false)}
+                            className="absolute top-4 right-4 text-gray-500 hover:text-gray-700"
+                        >
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18 18 6M6 6l12 12" />
+                            </svg>
+                        </button>
+                        <h2 className="text-xl font-bold mb-4">{modalTitle}</h2>
+                        <div className="max-h-[60vh] overflow-y-auto">
+                            {modalData ? (
+                                <ul className="space-y-2">
+                                    {modalData.map((err: any, idx: number) => {
+                                        const key = Object.keys(err)[0];
+                                        const value = err[key];
+                                        return (
+                                            <li key={idx} className="text-sm text-black">
+                                                <span className="font-semibold">{idx + 1}. {key}:</span> {value}
+                                            </li>
+                                        );
+                                    })}
+                                </ul>
+                            ) : (
+                                <div className="text-green-600 font-medium flex items-center gap-2">
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
+                                        <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                                    </svg>
+                                    Success! No errors found.
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
