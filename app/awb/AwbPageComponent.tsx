@@ -20,7 +20,7 @@ function ChargesTab({ data, onChange, errorFields }: { data: any, onChange: (fie
             : "border rounded px-2 py-1 w-full";
     };
 
-    const { total, totalOtherChargesDueAgent, totalOtherChargesDueCarrier, finalTotal, Valuation_Charge, Weight_Charge } = data;
+    const { total, totalOtherChargesDueAgent, totalOtherChargesDueCarrier, finalTotal, Valuation_Charge, Net_Charge } = data;
 
     // Error Tooltip Component
     const ErrorTooltip = ({ fieldKey }: { fieldKey: string }) => {
@@ -332,7 +332,7 @@ function ChargesTab({ data, onChange, errorFields }: { data: any, onChange: (fie
                                 <td className="border px-2 py-1 text-right">Collect</td>
                             </tr>
                             <tr>
-                                <td className="border px-2 py-1 text-right">{Weight_Charge}</td>
+                                <td className="border px-2 py-1 text-right">{Net_Charge}</td>
                                 <td className="border px-2 py-1 text-right">Weight Charge</td>
                                 <td className="border px-2 py-1 text-right">0.00</td>
                             </tr>
@@ -486,7 +486,9 @@ export default function AwbPageComponent() {
         total: 0,
         totalOtherChargesDueAgent: 0,
         totalOtherChargesDueCarrier: 0,
-        finalTotal: 0
+        finalTotal: 0,
+        Net_Charge: 0,
+        Valuation_Charge: 0
     });
 
     const handleGeneralChange = (field: string, value: any) => {
@@ -535,7 +537,7 @@ export default function AwbPageComponent() {
             setTotal(result.data.Total || 0);
             setTotalOtherChargesDueAgent(result.data.Total_Other_Charges_Due_Agent || 0);
             setTotalOtherChargesDueCarrier(result.data.Total_Other_Charges_Due_Carrier || 0);
-            setFinalTotal(result.data.Total + result.data.Net_Rate || 0);
+            setFinalTotal((result.data.Total || 0) + (result.data.Net_Charge || 0));
 
 
             setChargesData(prev => ({
@@ -547,7 +549,7 @@ export default function AwbPageComponent() {
 
                 // Add the new fields
                 Valuation_Charge: result.data.Valuation_Charge || 0,
-                Weight_Charge: result.data.Weight_Charge || 0
+                Net_Charge: result.data.Net_Charge || 0
             }));
 
 
@@ -592,21 +594,12 @@ export default function AwbPageComponent() {
                             uld: "",
                             description: "",
                             ratePivot: apiData.Rate_Pivot || "",
-                            netCharge: apiData.Net_Rate || ""
+                            netCharge: apiData.Net_Charge || ""
                         }
                     ],
 
                     // Charge Details (Row 1 to Row 5)
                     chargeDetails: [
-                        {
-                            code: apiData.Charge_Details_Code || "",
-                            name: apiData.Charge_Details_Charge_Head_Name || "",
-                            charge: apiData.Charge_Details_Charge || "",
-                            ppcc: apiData.Charge_Details_PP_CC || "",
-                            dueCarrier: "",
-                            dueAgent: "",
-                            remarks: ""
-                        },
                         {
                             code: apiData["1_Charge_Details_Code"] || "",
                             name: apiData["1_Charge_Details_Charge_Head_Name"] || "",
@@ -639,6 +632,15 @@ export default function AwbPageComponent() {
                             name: apiData["4_Charge_Details_Charge_Head_Name"] || "",
                             charge: apiData["4_Charge_Details_Charge"] || "",
                             ppcc: apiData["4_Charge_Details_PP_CC"] || "",
+                            dueCarrier: "",
+                            dueAgent: "",
+                            remarks: ""
+                        },
+                        {
+                            code: apiData["5_Charge_Details_Code"] || "",
+                            name: apiData["5_Charge_Details_Charge_Head_Name"] || "",
+                            charge: apiData["5_Charge_Details_Charge"] || "",
+                            ppcc: apiData["5_Charge_Details_PP_CC"] || "",
                             dueCarrier: "",
                             dueAgent: "",
                             remarks: ""
