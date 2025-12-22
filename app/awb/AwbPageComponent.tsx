@@ -880,7 +880,6 @@ export default function AwbPageComponent() {
                             ← Back
                         </button>
 
-                        <div className="text-sm text-gray-600">User: C_DIVESH.CHOUDHARY1</div>
                     </div>
 
                 </div>
@@ -1299,9 +1298,6 @@ export default function AwbPageComponent() {
 
                         <div className="flex items-center gap-2">
                             <button className="px-3 py-1 border rounded text-sm">Close</button>
-                            <div className="text-sm text-gray-500">
-                                Last updated by: C_DIVESH.CHOUDHARY1
-                            </div>
                         </div>
                     </div>
 
